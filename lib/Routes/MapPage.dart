@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_test/Services/location_service.dart';
+import 'package:geolocator/geolocator.dart';//get current location
 
 
 class MapPage extends StatefulWidget {
@@ -19,6 +20,10 @@ class _MapPageState extends State<MapPage> {
   TextEditingController _originController = TextEditingController();
   TextEditingController _destinationController = TextEditingController();
 
+  //current initial position
+  String? _currentAddress;
+  Position? _currentPosition;
+
   //store sets markers, polygons, and the lists of  lat and long of the polygons
   Set<Marker> _markers = Set<Marker>();
   Set<Polygon> _polygons = Set<Polygon>();
@@ -32,20 +37,18 @@ class _MapPageState extends State<MapPage> {
   int _polylineIdCounter = 1;
 
   //two camera objects (googleplex and lake)
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+  static CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(0, 0),
     zoom: 14.4746,
   );
 
     @override
     void initState(){
       super.initState();
-
-      _setMarker(LatLng(37.42796133580664, -122.085749655962));
+      _getCurrentPosition();
     }
 
     //mengisi set set yg telah dibuat dengan method
-
     void _setMarker(LatLng point){//adds the marker to the set of markers (sets of markers are the variables located above)
       setState((){
         _markers.add(//add is a function on class sets
@@ -136,6 +139,8 @@ class _MapPageState extends State<MapPage> {
           //what loads the google map
           Expanded(
             child: GoogleMap(
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
               mapType: MapType.normal,
               markers: _markers,
               polygons:_polygons,
@@ -184,4 +189,19 @@ class _MapPageState extends State<MapPage> {
     _setMarker(LatLng(lat, lng));
   }
 
+  Future<void> _getCurrentPosition() async {
+    await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        _kGooglePlex = CameraPosition(
+          target: LatLng(_currentPosition?.latitude ?? 0, _currentPosition?.longitude ?? 0),
+          zoom: 14.4746,
+        );
+      });
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
 }
