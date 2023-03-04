@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_test/Services/location_service.dart';
 import 'package:geolocator/geolocator.dart';//get current location
+import 'package:map_test/Services/weather_service.dart';
+import 'package:slider_button/slider_button.dart';
+import 'package:weather/weather.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -17,8 +22,15 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();//to control the map
-  TextEditingController _originController = TextEditingController();
-  TextEditingController _destinationController = TextEditingController();
+  TextEditingController _destinationController = TextEditingController();//for user's string destination
+  late double latitudeDestination;
+  late double longitudeDestination;
+  late String chosenType;
+  bool weatherFilter = false;
+  late int weatherCondition;
+
+  //types of attractions
+  List<String> attractions = ['tourist attraction','restaurant','lodging','park','shopping mall'];
 
   //current initial position
   String? _currentAddress;
@@ -97,10 +109,8 @@ class _MapPageState extends State<MapPage> {
           Row(
             children: [
                 Expanded(
-                  child: Column(
-                    children:[
-                      TextFormField(
-                        controller: _originController,
+                    child: TextFormField(
+                        controller: _destinationController,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(hintText: "Search by heart origin"),
                         onChanged: (value){
@@ -111,28 +121,27 @@ class _MapPageState extends State<MapPage> {
                       //   var place = await LocationService().getPlace(_searchController.text);
                       //   _goToThePlace(place);
                       // },icon:Icon(Icons.search),),
-                      TextFormField(
-                        controller: _destinationController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(hintText: "Search by heart destination"),
-                        onChanged: (value){
-                          print(value);
-                        },
-                      ),
-                    ],
-                  ),
                 ),
               IconButton(onPressed: () async{
-                var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
+                var placeDetails = await LocationService().getPlace(_destinationController.text);//get details of destination
+                _goToThePlace(placeDetails);
+                latitudeDestination=placeDetails['geometry']['location']['lat'];
+                longitudeDestination=placeDetails['geometry']['location']['lng'];
+                print(latitudeDestination);
+                print(longitudeDestination);
+                var weatherDetails = await WeatherService().getWeather(latitudeDestination, longitudeDestination);
+                showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails),);
 
-                _goToThePlace(
-                    directions['start_location']['lat'],
-                    directions['start_location']['lng'],
-                    directions['bounds_ne'],
-                    directions['bounds_sw'],
-                );
-
-                _setPolyline(directions['polyline_decoded']);
+                // var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
+                //
+                // _goToThePlace(
+                //     directions['start_location']['lat'],
+                //     directions['start_location']['lng'],
+                //     directions['bounds_ne'],
+                //     directions['bounds_sw'],
+                // );
+                //
+                // _setPolyline(directions['polyline_decoded']);
               },icon:Icon(Icons.search),),
             ],
           ),
@@ -163,28 +172,28 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Future<void> _goToThePlace(double lat, double lng,Map<String,dynamic> boundsNe,Map<String,dynamic> boundsSw) async {//change camera position to the one we searched for and then create a new marker there (ni dulu)
-                                                                                                                      //updates camera position to include both origin and destination while making marker for the origin
-    //final double lat = place['geometry']['location']['lat'];
-    //final double lng = place['geometry']['location']['lng'];
+  Future<void> _goToThePlace(Map<String, dynamic> place) async {//change camera position to the one we searched for and then create a new marker there (ni dulu)
+                                                            //updates camera position to include both origin and destination while making marker for the origin
+    final double lat = place['geometry']['location']['lat'];
+    final double lng = place['geometry']['location']['lng'];
 
     final GoogleMapController controller = await _controller.future;
 
-    // controller.animateCamera(CameraUpdate.newCameraPosition(//ni x pakai since we need origin and destination but this bascially moves the camera to the position
-    //     CameraPosition(
-    //         bearing: 0,
-    //         target: LatLng(lat, lng),
-    //         tilt: 59.440717697143555,
-    //         zoom: 12)
-    // ));
+    controller.animateCamera(CameraUpdate.newCameraPosition(//ni x pakai since we need origin and destination but this bascially moves the camera to the position
+        CameraPosition(
+            bearing: 0,
+            target: LatLng(lat, lng),
+            tilt: 59.440717697143555,
+            zoom: 12)
+    ));
     
-    controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
-        LatLngBounds(
-            southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
-            northeast: LatLng(boundsNe['lat'],boundsNe['lng']),
-        ),
-        25)
-    );
+    // controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
+    //     LatLngBounds(
+    //         southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
+    //         northeast: LatLng(boundsNe['lat'],boundsNe['lng']),
+    //     ),
+    //     25)
+    // );
 
     _setMarker(LatLng(lat, lng));
   }
@@ -204,4 +213,184 @@ class _MapPageState extends State<MapPage> {
       debugPrint(e);
     });
   }
+
+  Widget buildSheet(Map<String, dynamic> weatherDetails)=>Container(
+    child: Column(
+      children:[
+        Flexible(
+          child:Container(
+            height:50,
+            child: ListView.builder(
+              itemCount: attractions.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(2),
+                  child: ElevatedButton(
+                      onPressed: () {
+                        print("attraction pressed");
+                        chosenType=attractions[index];
+                      },
+                      child: Text(attractions[index]),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        backgroundColor: Colors.cyan,
+                      ),
+                    ),
+                );
+              },
+            ),
+          ),
+        ),
+        //SliderButtonWeather(),
+        weatherWidget(weatherDetails),
+      ]
+    )
+  );
+
+
+    Widget weatherWidget(Map<String, dynamic> weatherDetails)=> 
+        Expanded(
+          child: ListView.builder(
+              itemCount: 24,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index){
+                String hour = WeatherService().getHour(weatherDetails['date'][index]);
+                IconData icon = WeatherService().getIcon(weatherDetails['weathercode'][index], hour);
+                  return InkWell(
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.fromLTRB(10,10,10,5),
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                Colors.blue,
+                                Colors.red,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              BoxedIcon(icon),
+                              Container(
+                                  margin:EdgeInsets.all(5),
+                                  child: Text(
+                                  weatherDetails['temperature_2m'][index].toString()+"℃",
+                                style:TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              )
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                            child: Text(
+                                hour,
+                            style:TextStyle(
+                              fontWeight: FontWeight.w600,
+                            )),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      print("The icon is clicked");
+                    },
+                  );
+              }
+    ),
+        );
+
+
+          // Expanded(
+          //     child: Flexible(
+          //       child: ListView.builder(
+          //         itemCount: 2,
+          //         scrollDirection: Axis.vertical,
+          //         itemBuilder: (context, index) {
+          //           return Expanded(
+          //           child: Column(
+          //             children:[
+          //               Flexible(
+          //               child: ListView.builder(
+          //               itemCount: 24,
+          //               scrollDirection: Axis.horizontal,
+          //               itemBuilder: (context, index) {//each forecast card for each hour
+          //                 return InkWell(
+          //                   child: Column(
+          //                     children: [
+          //                       Container(
+          //                           margin:EdgeInsets.all(10),
+          //                           padding: EdgeInsets.all(10),
+          //                         decoration: BoxDecoration(
+          //                             gradient: LinearGradient(
+          //                               begin: Alignment.topRight,
+          //                               end: Alignment.bottomLeft,
+          //                               colors: [
+          //                                 Colors.blue,
+          //                                 Colors.red,
+          //                               ],
+          //                             ),
+          //                         ),
+          //                          child:Column(
+          //                            children: [
+          //                              BoxedIcon(WeatherIcons.day_sunny),
+          //                              Container(child:Text(weatherDetails['temperature_2m'][index].toString())),
+          //                            ],
+          //                          ),
+          //                       ),
+          //                       Container(child:Text(weatherDetails['date'][index].toString()))
+          //                     ],
+          //                   ),
+          //                   onTap: (){
+          //                     print("The icon is clicked");
+          //                   },
+          //                 );
+          //               }
+          //               ),
+          //               ),
+          //             ],
+          //           ),
+          //           );
+          //         },
+          //       ),
+          //     ),
+          //   );
+
+    Widget SliderButtonWeather()=>
+        Container(
+          margin:EdgeInsets.all(10),
+          alignment: Alignment.topLeft,
+          height: 70,
+            child: SliderButton(
+              width:170,
+                buttonSize: 60,
+                action: () {
+                  setState(() {
+                    weatherFilter = true;
+                  });
+                },
+                label: Text(
+                  "Filter by\n weather",
+                  style: TextStyle(
+                      color: Color(0xff4a4a4a), fontWeight: FontWeight.w500, fontSize: 15),
+                ),
+                icon: Center(
+                    child:Icon(
+                      Icons.cloud,
+                      color:Colors.teal,
+                      size:30.0,
+                    )
+                )
+            ),
+          );
 }

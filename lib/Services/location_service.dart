@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
@@ -57,6 +59,22 @@ class LocationService{//gets data of the place from the json
       'polyline_decoded':PolylinePoints().decodePolyline(json['routes'][0]['overview_polyline']['points']),//polyline data ada cuma encoded so kena decode that thing bruv
     };
     print(json);
+
+    return results;
+  }
+
+  Future<Map<String, dynamic>> getNearbyPlaces(Double latitude, Double longitude, String type) async{//get the
+    //url to get data from nearby place
+    int radius = 1500;
+    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json&location=$latitude%$longitude&radius=$radius&type=$type&key=$key';
+
+    var response = await http.get(Uri.parse(url));
+
+    var json = convert.jsonDecode(response.body);
+
+    var results = json['result'] as Map<String,dynamic>;//casting the result as a map
+
+    print("THIS IS THE RESULT OF THE JSON:"+ results.toString());
 
     return results;
   }
