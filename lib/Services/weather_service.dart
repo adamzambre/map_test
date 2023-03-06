@@ -38,48 +38,94 @@ class WeatherService{
     return hourAndMinutes;
   }
 
-  IconData getIcon(int weatherCode, String hour){
+  Map<String,dynamic> getIcon(int weatherCode, String hour){
 
     DateTime halfFormat = DateFormat("hh:mm a").parse(hour);
     String fullFormat = DateFormat("HH:mm").format(halfFormat);
     List<String> hourFullFormat = fullFormat.split(":");
     int hourInt = int.parse(hourFullFormat[0]);
+    Map<String,dynamic> result = {};
 
     if(hourInt<=19){//siang
       if(weatherCode==0 ||weatherCode==1){
-        return WeatherIcons.day_sunny;
+        return result ={
+          'icon':WeatherIcons.day_sunny,
+          'weather':"clear",
+        };
       }else if (weatherCode==2 ||weatherCode==3){
-        return WeatherIcons.day_cloudy;
+        return result ={
+          'icon':WeatherIcons.day_cloudy,
+          'weather':"cloudy",
+        };
       }else if(weatherCode==45 ||weatherCode==48){
-        return WeatherIcons.day_fog;//
+        return result ={
+          'icon':WeatherIcons.day_fog,
+          'weather':"fog",
+        };//
       }else if(weatherCode==51 ||weatherCode==52||weatherCode==53){
-        return WeatherIcons.day_sprinkle;
+        return result ={
+          'icon':WeatherIcons.day_sprinkle,
+          'weather':"drizzle",
+        };;
       }else if(weatherCode==61 ||weatherCode==63||weatherCode==65||weatherCode==80 ||weatherCode==81||weatherCode==82){
-        return WeatherIcons.day_rain;//
+        return result ={
+          'icon':WeatherIcons.day_rain,
+          'weather':"rain",
+        };;//
       }else if(weatherCode==95 ||weatherCode==96||weatherCode==99){
-        return WeatherIcons.day_thunderstorm;
+        return result ={
+          'icon':WeatherIcons.day_thunderstorm,
+          'weather':"thunderstrom",
+        };;
       }else if(weatherCode==71 ||weatherCode==73||weatherCode==75||weatherCode==85 ||weatherCode==86){
-        return WeatherIcons.day_snow;//
+        return result ={
+          'icon':WeatherIcons.day_snow,
+          'weather':"snow",
+        };;//
       }
     }else{//malam
       if(weatherCode==0 ||weatherCode==1){
-        return WeatherIcons.night_clear;
+        return result ={
+          'icon':WeatherIcons.night_clear,
+          'weather':"clear",
+        };;
       }else if (weatherCode==2 ||weatherCode==3){
-        return WeatherIcons.night_alt_cloudy;
+        return result ={
+          'icon':WeatherIcons.night_alt_cloudy,
+          'weather':"cloudy",
+        };;
       }else if(weatherCode==45 ||weatherCode==48){
-        return WeatherIcons.night_fog;//
+        return result ={
+          'icon':WeatherIcons.night_fog,
+          'weather':"fog",
+        };;//
       }else if(weatherCode==51 ||weatherCode==52||weatherCode==53){
-        return WeatherIcons.night_alt_sprinkle;
+        return result ={
+          'icon':WeatherIcons.night_alt_sprinkle,
+          'weather':"drizzle",
+        };;
       }else if(weatherCode==61 ||weatherCode==63||weatherCode==65||weatherCode==80 ||weatherCode==81||weatherCode==82){
-        return WeatherIcons.night_rain;//
+        return result ={
+          'icon':WeatherIcons.night_rain,
+          'weather':"rain",
+        };;//
       }else if(weatherCode==95 ||weatherCode==96||weatherCode==99){
-        return WeatherIcons.night_alt_thunderstorm;
+        return result ={
+          'icon':WeatherIcons.night_alt_thunderstorm,
+          'weather':"thunderstrom",
+        };;
       }else if(weatherCode==71 ||weatherCode==73||weatherCode==75||weatherCode==85 ||weatherCode==86){
-        return WeatherIcons.night_alt_snow;//
+        return result ={
+          'icon':WeatherIcons.night_alt_snow,
+          'weather':"snow",
+        };;//
       };
     };
 
-    return WeatherIcons.alien;
+    return result = {
+      'icon':WeatherIcons.alien,
+      'weather':'wadadogdoin',
+    };
   }
 
 

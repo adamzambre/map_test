@@ -1,4 +1,5 @@
 import 'dart:async';
+//import 'dart:html';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,10 @@ class _MapPageState extends State<MapPage> {
   late String chosenType;
   bool weatherFilter = false;
   late int weatherCondition;
+  //late Map<String,dynamic> nearbyPlaces;
+  List<String> filter = [];
+  late Map<String,dynamic> icon;
+  bool FilterRowIsVisible =  false;
 
   //types of attractions
   List<String> attractions = ['tourist attraction','restaurant','lodging','park','shopping mall'];
@@ -103,7 +108,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:AppBar(title:Text('Chicken Soups'),),
+      appBar:AppBar(title:Text('Chicken Soupz'),),
       body: Column(
         children: [
           Row(
@@ -124,13 +129,16 @@ class _MapPageState extends State<MapPage> {
                 ),
               IconButton(onPressed: () async{
                 var placeDetails = await LocationService().getPlace(_destinationController.text);//get details of destination
+                print('placeDetails vartype is: '+ placeDetails.runtimeType.toString());
                 _goToThePlace(placeDetails);
                 latitudeDestination=placeDetails['geometry']['location']['lat'];
                 longitudeDestination=placeDetails['geometry']['location']['lng'];
                 print(latitudeDestination);
                 print(longitudeDestination);
                 var weatherDetails = await WeatherService().getWeather(latitudeDestination, longitudeDestination);
-                showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails),);
+                var nearbyPlaces = await LocationService().getNearbyPlaces(latitudeDestination, longitudeDestination);
+                print('nearbyPlaces vartype is: '+ nearbyPlaces.runtimeType.toString());
+                showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails,nearbyPlaces),);
 
                 // var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
                 //
@@ -214,10 +222,12 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  Widget buildSheet(Map<String, dynamic> weatherDetails)=>Container(
+  Widget buildSheet(Map<String, dynamic> weatherDetails,List<dynamic> nearbyPlaces)=>Container(
+
     child: Column(
       children:[
-        Flexible(
+        Flexible(//tukar this widget to drop down
+          flex:1,
           child:Container(
             height:50,
             child: ListView.builder(
@@ -247,150 +257,137 @@ class _MapPageState extends State<MapPage> {
         ),
         //SliderButtonWeather(),
         weatherWidget(weatherDetails),
+        //WidgetShowingWhatisFiltered(),
+        nearbyPlacesWidget(nearbyPlaces),
       ]
     )
   );
 
 
     Widget weatherWidget(Map<String, dynamic> weatherDetails)=> 
-        Expanded(
-          child: ListView.builder(
-              itemCount: 24,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index){
-                String hour = WeatherService().getHour(weatherDetails['date'][index]);
-                IconData icon = WeatherService().getIcon(weatherDetails['weathercode'][index], hour);
-                  return InkWell(
-                    child: Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.fromLTRB(10,10,10,5),
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            gradient: LinearGradient(
-                              begin: Alignment.topRight,
-                              end: Alignment.bottomLeft,
-                              colors: [
-                                Colors.blue,
-                                Colors.red,
+        Flexible(
+          flex:2,
+          child: Container(
+            height:150,
+            child: ListView.builder(
+                itemCount: 24,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index){
+                  String hour = WeatherService().getHour(weatherDetails['date'][index]);
+                  icon = WeatherService().getIcon(weatherDetails['weathercode'][index], hour);
+                    return InkWell(
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.fromLTRB(10,10,10,5),
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                                colors: [
+                                  Colors.blue,
+                                  Colors.red,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                BoxedIcon(icon['icon']),
+                                Container(
+                                    margin:EdgeInsets.all(5),
+                                    child: Text(
+                                    weatherDetails['temperature_2m'][index].toString()+"℃",
+                                  style:TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                ),
                               ],
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              BoxedIcon(icon),
-                              Container(
-                                  margin:EdgeInsets.all(5),
-                                  child: Text(
-                                  weatherDetails['temperature_2m'][index].toString()+"℃",
-                                style:TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              )
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                            child: Text(
-                                hour,
-                            style:TextStyle(
-                              fontWeight: FontWeight.w600,
-                            )),
-                        )
-                      ],
-                    ),
-                    onTap: () {
-                      print("The icon is clicked");
-                    },
-                  );
-              }
-    ),
+                          Container(
+                              child: Text(
+                                  hour,
+                              style:TextStyle(
+                                fontWeight: FontWeight.w600,
+                              )),
+                          )
+                        ],
+                      ),
+                      onTap: () {
+                        print("The icon is clicked");
+                        filter.add(icon['weather']);
+                        FilterRowIsVisible = true;
+                        print(FilterRowIsVisible);
+                        print(filter.toString());
+                      },
+                    );
+                }
+            ),
+          ),
         );
 
 
-          // Expanded(
-          //     child: Flexible(
-          //       child: ListView.builder(
-          //         itemCount: 2,
-          //         scrollDirection: Axis.vertical,
-          //         itemBuilder: (context, index) {
-          //           return Expanded(
-          //           child: Column(
-          //             children:[
-          //               Flexible(
-          //               child: ListView.builder(
-          //               itemCount: 24,
-          //               scrollDirection: Axis.horizontal,
-          //               itemBuilder: (context, index) {//each forecast card for each hour
-          //                 return InkWell(
-          //                   child: Column(
-          //                     children: [
-          //                       Container(
-          //                           margin:EdgeInsets.all(10),
-          //                           padding: EdgeInsets.all(10),
-          //                         decoration: BoxDecoration(
-          //                             gradient: LinearGradient(
-          //                               begin: Alignment.topRight,
-          //                               end: Alignment.bottomLeft,
-          //                               colors: [
-          //                                 Colors.blue,
-          //                                 Colors.red,
-          //                               ],
-          //                             ),
-          //                         ),
-          //                          child:Column(
-          //                            children: [
-          //                              BoxedIcon(WeatherIcons.day_sunny),
-          //                              Container(child:Text(weatherDetails['temperature_2m'][index].toString())),
-          //                            ],
-          //                          ),
-          //                       ),
-          //                       Container(child:Text(weatherDetails['date'][index].toString()))
-          //                     ],
-          //                   ),
-          //                   onTap: (){
-          //                     print("The icon is clicked");
-          //                   },
-          //                 );
-          //               }
-          //               ),
-          //               ),
-          //             ],
-          //           ),
-          //           );
-          //         },
-          //       ),
-          //     ),
-          //   );
+    // Widget WidgetShowingWhatisFiltered()=>
+    //     Expanded(
+    //       child: Visibility(
+    //         visible:FilterRowIsVisible,
+    //         child: ListView.builder(
+    //             itemCount: filter.length,
+    //             scrollDirection: Axis.horizontal,
+    //             itemBuilder: (context, index){
+    //               final item = filter[index];
+    //               return Dismissible(
+    //                   key: Key(item),
+    //                   child: Container(
+    //                     margin:EdgeInsets.fromLTRB(10, 10, 10, 5),
+    //                     child:Text(icon['weather']),
+    //                   ),
+    //                   onDismissed: (direction) {
+    //                     // Remove the item from the data source.
+    //                     setState(() {
+    //                       filter.removeAt(index);
+    //                     });
+    //                   });
+    //                 // margin:EdgeInsets.fromLTRB(10, 10, 10, 5),
+    //                 //   child: Column(
+    //                 //     crossAxisAlignment: CrossAxisAlignment.center,
+    //                 //     children: [
+    //                 //       Container(
+    //                 //         alignment: FractionalOffset.topRight,
+    //                 //         child: IconButton(
+    //                 //           onPressed: () {
+    //                 //             Navigator.pop(context);
+    //                 //             filter.remove(filter[index]);
+    //                 //             print(filter.toString());
+    //                 //           },
+    //                 //           icon: const Icon(Icons.clear),
+    //                 //         ),
+    //                 //       ),
+    //                 //       Text(icon['weather']),
+    //                 //     ],
+    //                 //   ),
+    //                 // );
+    //             }
+    //         ),
+    //       ),
+    //     );
 
-    Widget SliderButtonWeather()=>
-        Container(
-          margin:EdgeInsets.all(10),
-          alignment: Alignment.topLeft,
-          height: 70,
-            child: SliderButton(
-              width:170,
-                buttonSize: 60,
-                action: () {
-                  setState(() {
-                    weatherFilter = true;
-                  });
-                },
-                label: Text(
-                  "Filter by\n weather",
-                  style: TextStyle(
-                      color: Color(0xff4a4a4a), fontWeight: FontWeight.w500, fontSize: 15),
-                ),
-                icon: Center(
-                    child:Icon(
-                      Icons.cloud,
-                      color:Colors.teal,
-                      size:30.0,
-                    )
-                )
-            ),
-          );
+  Widget nearbyPlacesWidget(List<dynamic> nearbyPlaces)=>
+      Expanded(
+        flex:4,
+        child: ListView.builder(
+          itemCount: nearbyPlaces.length,
+          scrollDirection: Axis.vertical,
+          itemBuilder: (context, index){
+            return Container(
+              child:Text("test: "+nearbyPlaces[index]['name']),
+            );
+          }
+        )
+      );
+
 }

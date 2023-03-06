@@ -36,6 +36,8 @@ class LocationService{//gets data of the place from the json
 
     var json = convert.jsonDecode(response.body);
 
+    print('getPlace vartype in function is: '+ json.runtimeType.toString());
+
     var results = json['result'] as Map<String,dynamic>;//casting the result as a map
 
     print("THIS IS THE RESULT OF THE JSON:"+ results.toString());
@@ -63,18 +65,20 @@ class LocationService{//gets data of the place from the json
     return results;
   }
 
-  Future<Map<String, dynamic>> getNearbyPlaces(Double latitude, Double longitude, String type) async{//get the
-    //url to get data from nearby place
+  Future<List<dynamic>> getNearbyPlaces(double latitude, double longitude) async{//get the url to get data from nearby place
     int radius = 1500;
-    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json&location=$latitude%$longitude&radius=$radius&type=$type&key=$key';
+    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude%2C$longitude&radius=$radius&key=$key';
 
     var response = await http.get(Uri.parse(url));
 
     var json = convert.jsonDecode(response.body);
 
-    var results = json['result'] as Map<String,dynamic>;//casting the result as a map
+    print('nearbyPlaces vartype in function is: '+ json.runtimeType.toString());
 
-    print("THIS IS THE RESULT OF THE JSON:"+ results.toString());
+    var results = json['results'] as List<dynamic>;//cant cast as a map since it returns a list of maps actually
+
+    print("THIS IS THE RESULT OF THE JSON NearbyPlaces:"+ results.toString());
+    print('nearbyPlaces vartype in function is: '+ json.runtimeType.toString());
 
     return results;
   }
