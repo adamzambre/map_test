@@ -82,4 +82,10 @@ class LocationService{//gets data of the place from the json
 
     return results;
   }
+
+  Future getPhoto(String photoReference) async{//get the url to get data from nearby place
+    var photo = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=$photoReference&key=$key';
+
+    return photo;
+  }
 }

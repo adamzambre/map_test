@@ -21,18 +21,23 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller =
-  Completer<GoogleMapController>();//to control the map
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();//to control the map
   TextEditingController _destinationController = TextEditingController();//for user's string destination
   late double latitudeDestination;
   late double longitudeDestination;
-  late String chosenType;
+  late Map<String,dynamic> chosenType;
   bool weatherFilter = false;
   late int weatherCondition;
   //late Map<String,dynamic> nearbyPlaces;
   List<String> filter = [];
   late Map<String,dynamic> icon;
   bool FilterRowIsVisible =  false;
+  final Map<String,List<String>> foodAndDrink = {'Food and drink': ['restaurant','bar','cafe','meal_takeway','meal_takeway']};
+  final Map<String,List<String>> thingsToDo = {'Things to do': ['amusement_park', 'aquarium', 'art_gallery', 'bowling_alley', 'campground', 'casino', 'movie_rental', 'movie_theater', 'museum', 'night_club', 'park', 'stadium', 'zoo']};
+  final Map<String,List<String>> shopping = {'Shopping': ['book_store', 'clothing_store', 'convenience_store', 'department_store', 'electronics_store', 'furniture_store', 'grocery_or_supermarket', 'home_goods_store', 'jewelry_store', 'liquor_store', 'pet_store', 'shoe_store', 'shopping_mall']};
+  final Map<String,List<String>> services = {'Services': ['airport', 'atm', 'bank', 'bus_station', 'car_rental', 'car_repair', 'car_wash', 'courthouse', 'dentist', 'doctor', 'electrician', 'embassy', 'fire_station', 'funeral_home', 'gas_station', 'gym', 'hair_care', 'hospital', 'insurance_agency', 'laundry', 'lawyer', 'library', 'local_government_office', 'locksmith', 'lodging', 'moving_company', 'painter', 'pharmacy', 'physiotherapist', 'plumber', 'police', 'post_office', 'real_estate_agency', 'roofing_contractor', 'rv_park', 'school', 'storage', 'subway_station', 'supermarket', 'synagogue', 'taxi_stand', 'train_station', 'transit_station', 'travel_agency', 'veterinary_care']};
+  late List<Map<String,List<String>>> preferences;
+  int selectedPreferenceIndex = 0;//to change color of container preferences when user choose
 
   //types of attractions
   List<String> attractions = ['tourist attraction','restaurant','lodging','park','shopping mall'];
@@ -61,6 +66,7 @@ class _MapPageState extends State<MapPage> {
 
     @override
     void initState(){
+      preferences = [foodAndDrink,thingsToDo,shopping,services];
       super.initState();
       _getCurrentPosition();
     }
@@ -108,12 +114,14 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:false,//so that bila keyboard appears dia tak kecikkan container preferences
       appBar:AppBar(title:Text('Chicken Soupz'),),
       body: Column(
         children: [
           Row(
             children: [
                 Expanded(
+                  flex: 1,
                     child: TextFormField(
                         controller: _destinationController,
                         textCapitalization: TextCapitalization.words,
@@ -153,8 +161,10 @@ class _MapPageState extends State<MapPage> {
               },icon:Icon(Icons.search),),
             ],
           ),
+          preferencesWidget(),
           //what loads the google map
           Expanded(
+            flex:15,
             child: GoogleMap(
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
@@ -222,42 +232,44 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  Widget preferencesWidget()=>Expanded(
+      flex: 1,
+    child:Container(
+      child: ListView.builder(
+        itemCount: preferences.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          String categoryName = preferences[index].keys.first;
+          return Container(
+            margin: EdgeInsets.all(5),
+            padding: EdgeInsets.all(2),
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  filter.add(preferences[index].keys.toString());
+                  selectedPreferenceIndex = index;
+                });
+                print("attraction pressed: "+ preferences[index].toString());
+              },
+              child: Text(categoryName),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                backgroundColor: selectedPreferenceIndex == index ? Colors.teal : Colors.cyan,
+              ),
+            ),
+          );
+        },
+      ),
+    )
+  );
+
   Widget buildSheet(Map<String, dynamic> weatherDetails,List<dynamic> nearbyPlaces)=>Container(
 
     child: Column(
       children:[
-        Flexible(//tukar this widget to drop down
-          flex:1,
-          child:Container(
-            height:50,
-            child: ListView.builder(
-              itemCount: attractions.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: EdgeInsets.all(5),
-                  padding: EdgeInsets.all(2),
-                  child: ElevatedButton(
-                      onPressed: () {
-                        print("attraction pressed");
-                        chosenType=attractions[index];
-                      },
-                      child: Text(attractions[index]),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        backgroundColor: Colors.cyan,
-                      ),
-                    ),
-                );
-              },
-            ),
-          ),
-        ),
-        //SliderButtonWeather(),
         weatherWidget(weatherDetails),
-        //WidgetShowingWhatisFiltered(),
         nearbyPlacesWidget(nearbyPlaces),
       ]
     )
@@ -294,15 +306,23 @@ class _MapPageState extends State<MapPage> {
                             ),
                             child: Column(
                               children: [
+                                Container(
+                                  child:Text(icon['weather'],
+                                    style:TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                                 BoxedIcon(icon['icon']),
                                 Container(
                                     margin:EdgeInsets.all(5),
                                     child: Text(
                                     weatherDetails['temperature_2m'][index].toString()+"℃",
-                                  style:TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                      style:TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                 )
                                 ),
                               ],
@@ -331,51 +351,6 @@ class _MapPageState extends State<MapPage> {
         );
 
 
-    // Widget WidgetShowingWhatisFiltered()=>
-    //     Expanded(
-    //       child: Visibility(
-    //         visible:FilterRowIsVisible,
-    //         child: ListView.builder(
-    //             itemCount: filter.length,
-    //             scrollDirection: Axis.horizontal,
-    //             itemBuilder: (context, index){
-    //               final item = filter[index];
-    //               return Dismissible(
-    //                   key: Key(item),
-    //                   child: Container(
-    //                     margin:EdgeInsets.fromLTRB(10, 10, 10, 5),
-    //                     child:Text(icon['weather']),
-    //                   ),
-    //                   onDismissed: (direction) {
-    //                     // Remove the item from the data source.
-    //                     setState(() {
-    //                       filter.removeAt(index);
-    //                     });
-    //                   });
-    //                 // margin:EdgeInsets.fromLTRB(10, 10, 10, 5),
-    //                 //   child: Column(
-    //                 //     crossAxisAlignment: CrossAxisAlignment.center,
-    //                 //     children: [
-    //                 //       Container(
-    //                 //         alignment: FractionalOffset.topRight,
-    //                 //         child: IconButton(
-    //                 //           onPressed: () {
-    //                 //             Navigator.pop(context);
-    //                 //             filter.remove(filter[index]);
-    //                 //             print(filter.toString());
-    //                 //           },
-    //                 //           icon: const Icon(Icons.clear),
-    //                 //         ),
-    //                 //       ),
-    //                 //       Text(icon['weather']),
-    //                 //     ],
-    //                 //   ),
-    //                 // );
-    //             }
-    //         ),
-    //       ),
-    //     );
-
   Widget nearbyPlacesWidget(List<dynamic> nearbyPlaces)=>
       Expanded(
         flex:4,
@@ -384,7 +359,56 @@ class _MapPageState extends State<MapPage> {
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index){
             return Container(
-              child:Text("test: "+nearbyPlaces[index]['name']),
+              margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10)
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              child:Row(
+                children:[
+                  Expanded(
+                    child: Column(
+                      children:[
+                        Container(
+                          padding:EdgeInsets.all(10),
+                            child: Text(nearbyPlaces[index]['name'],),
+                        ),
+                        Container(
+                          padding:EdgeInsets.all(10),
+                          alignment: Alignment.centerLeft,
+                          color: Colors.teal,
+                          child: Text('rating '+nearbyPlaces[index]['rating'].toString(),
+                          //textAlign: TextAlign.left,
+                          ),
+                        ),
+                        Text("test"/*nearbyPlaces[index]['open_now'] ? 'open now':'closed'*/),
+                      ]
+                    ),
+                  ),
+                  Expanded(
+                    child: FittedBox(
+                      child: FlutterLogo(), /*LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']) != null
+                          ? Image.network(
+                        LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']).toString(),
+                        fit: BoxFit.cover,
+                      ): CircularProgressIndicator(),*/
+                    ),
+                  )
+                ]
+              ),
             );
           }
         )

@@ -46,7 +46,7 @@ class WeatherService{
     int hourInt = int.parse(hourFullFormat[0]);
     Map<String,dynamic> result = {};
 
-    if(hourInt<=19){//siang
+    if(hourInt<=19 && hourInt>=07){//siang
       if(weatherCode==0 ||weatherCode==1){
         return result ={
           'icon':WeatherIcons.day_sunny,
