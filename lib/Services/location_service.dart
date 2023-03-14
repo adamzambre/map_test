@@ -52,6 +52,8 @@ class LocationService{//gets data of the place from the json
 
     var json = convert.jsonDecode(response.body);
 
+    print(json.toString());
+
     var results = {//how a map looks like for dart
       'bounds_ne':json['routes'][0]['bounds']['northeast'],
       'bounds_sw':json['routes'][0]['bounds']['southwest'],
@@ -65,9 +67,14 @@ class LocationService{//gets data of the place from the json
     return results;
   }
 
-  Future<List<dynamic>> getNearbyPlaces(double latitude, double longitude) async{//get the url to get data from nearby place
-    int radius = 1500;
-    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude%2C$longitude&radius=$radius&key=$key';
+  Future<List<dynamic>> getNearbyPlaces(double latitude, double longitude,Map<String,List<String>> type) async{//get the url to get data from nearby place
+    int radius = 50000;
+    String joinedTypes = type.values.join(",");
+    String myString = joinedTypes.replaceAll(RegExp(r'[\[\]\s]+'), '');
+    print("joinedTypes: "+myString);
+
+    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude%2C$longitude&radius=$radius&key=$key&type=$myString';
+    print("url: "+url);
 
     var response = await http.get(Uri.parse(url));
 
@@ -83,9 +90,8 @@ class LocationService{//gets data of the place from the json
     return results;
   }
 
-  Future getPhoto(String photoReference) async{//get the url to get data from nearby place
+  String getPhoto(String photoReference){//get the url to get data from nearby place
     var photo = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=$photoReference&key=$key';
-
     return photo;
   }
 }

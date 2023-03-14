@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
 //import 'dart:html';
 
+import 'package:custom_marker/marker_icon.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:map_test/Services/location_service.dart';
 import 'package:geolocator/geolocator.dart';//get current location
@@ -32,7 +36,7 @@ class _MapPageState extends State<MapPage> {
   List<String> filter = [];
   late Map<String,dynamic> icon;
   bool FilterRowIsVisible =  false;
-  final Map<String,List<String>> foodAndDrink = {'Food and drink': ['restaurant','bar','cafe','meal_takeway','meal_takeway']};
+  final Map<String,List<String>> foodAndDrink = {'Food and drink': ['restaurant','bar','cafe','meal_takeway']};
   final Map<String,List<String>> thingsToDo = {'Things to do': ['amusement_park', 'aquarium', 'art_gallery', 'bowling_alley', 'campground', 'casino', 'movie_rental', 'movie_theater', 'museum', 'night_club', 'park', 'stadium', 'zoo']};
   final Map<String,List<String>> shopping = {'Shopping': ['book_store', 'clothing_store', 'convenience_store', 'department_store', 'electronics_store', 'furniture_store', 'grocery_or_supermarket', 'home_goods_store', 'jewelry_store', 'liquor_store', 'pet_store', 'shoe_store', 'shopping_mall']};
   final Map<String,List<String>> services = {'Services': ['airport', 'atm', 'bank', 'bus_station', 'car_rental', 'car_repair', 'car_wash', 'courthouse', 'dentist', 'doctor', 'electrician', 'embassy', 'fire_station', 'funeral_home', 'gas_station', 'gym', 'hair_care', 'hospital', 'insurance_agency', 'laundry', 'lawyer', 'library', 'local_government_office', 'locksmith', 'lodging', 'moving_company', 'painter', 'pharmacy', 'physiotherapist', 'plumber', 'police', 'post_office', 'real_estate_agency', 'roofing_contractor', 'rv_park', 'school', 'storage', 'subway_station', 'supermarket', 'synagogue', 'taxi_stand', 'train_station', 'transit_station', 'travel_agency', 'veterinary_care']};
@@ -115,52 +119,53 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset:false,//so that bila keyboard appears dia tak kecikkan container preferences
-      appBar:AppBar(title:Text('Chicken Soupz'),),
+      appBar:AppBar(title:Text('Chicken Soups'),),
       body: Column(
         children: [
-          Row(
-            children: [
-                Expanded(
-                  flex: 1,
-                    child: TextFormField(
-                        controller: _destinationController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(hintText: "Search by heart origin"),
-                        onChanged: (value){
-                          print(value);
-                        },
-                      ),
-                      // IconButton(onPressed: () async{
-                      //   var place = await LocationService().getPlace(_searchController.text);
-                      //   _goToThePlace(place);
-                      // },icon:Icon(Icons.search),),
-                ),
-              IconButton(onPressed: () async{
-                var placeDetails = await LocationService().getPlace(_destinationController.text);//get details of destination
-                print('placeDetails vartype is: '+ placeDetails.runtimeType.toString());
-                _goToThePlace(placeDetails);
-                latitudeDestination=placeDetails['geometry']['location']['lat'];
-                longitudeDestination=placeDetails['geometry']['location']['lng'];
-                print(latitudeDestination);
-                print(longitudeDestination);
-                var weatherDetails = await WeatherService().getWeather(latitudeDestination, longitudeDestination);
-                var nearbyPlaces = await LocationService().getNearbyPlaces(latitudeDestination, longitudeDestination);
-                print('nearbyPlaces vartype is: '+ nearbyPlaces.runtimeType.toString());
-                showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails,nearbyPlaces),);
+            Row(
+              children: [
+                  Expanded(
+                    flex: 1,
+                      child: TextFormField(
+                          controller: _destinationController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: InputDecoration(hintText: "Search by heart origin"),
+                          onChanged: (value){
+                            print(value);
+                          },
+                        ),
+                        // IconButton(onPressed: () async{
+                        //   var place = await LocationService().getPlace(_searchController.text);
+                        //   _goToThePlace(place);
+                        // },icon:Icon(Icons.search),),
+                  ),
+                IconButton(onPressed: () async{
+                  var placeDetails = await LocationService().getPlace(_destinationController.text);//get details of destination
+                  print('placeDetails vartype is: '+ placeDetails.runtimeType.toString());
+                  _goToThePlace(placeDetails);
+                  latitudeDestination=placeDetails['geometry']['location']['lat'];
+                  longitudeDestination=placeDetails['geometry']['location']['lng'];
+                  print(latitudeDestination);
+                  print(longitudeDestination);
+                  var weatherDetails = await WeatherService().getWeather(latitudeDestination, longitudeDestination);
+                  print("CHIKENDOODA: "+preferences[selectedPreferenceIndex].toString());
+                  var nearbyPlaces = await LocationService().getNearbyPlaces(latitudeDestination, longitudeDestination,preferences[selectedPreferenceIndex]);
+                  print('nearbyPlaces vartype is: '+ nearbyPlaces.runtimeType.toString());
+                  showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails,nearbyPlaces),);
 
-                // var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
-                //
-                // _goToThePlace(
-                //     directions['start_location']['lat'],
-                //     directions['start_location']['lng'],
-                //     directions['bounds_ne'],
-                //     directions['bounds_sw'],
-                // );
-                //
-                // _setPolyline(directions['polyline_decoded']);
-              },icon:Icon(Icons.search),),
-            ],
-          ),
+                  // var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
+                  //
+                  // _goToThePlace(
+                  //     directions['start_location']['lat'],
+                  //     directions['start_location']['lng'],
+                  //     directions['bounds_ne'],
+                  //     directions['bounds_sw'],
+                  // );
+                  //
+                  // _setPolyline(directions['polyline_decoded']);
+                },icon:Icon(Icons.search),),
+              ],
+            ),
           preferencesWidget(),
           //what loads the google map
           Expanded(
@@ -205,6 +210,32 @@ class _MapPageState extends State<MapPage> {
             zoom: 12)
     ));
     
+    // controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
+    //     LatLngBounds(
+    //         southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
+    //         northeast: LatLng(boundsNe['lat'],boundsNe['lng']),
+    //     ),
+    //     25)
+    // );
+
+    _setMarker(LatLng(lat, lng));
+  }
+
+  Future<void> _goToThePlaceIcon(double lat, double lng) async {//change camera position to the one we searched for and then create a new marker there (ni dulu)
+    //updates camera position to include both origin and destination while making marker for the origin
+    // final double lat = place['geometry']['location']['lat'];
+    // final double lng = place['geometry']['location']['lng'];
+
+    final GoogleMapController controller = await _controller.future;
+
+    controller.animateCamera(CameraUpdate.newCameraPosition(//ni x pakai since we need origin and destination but this bascially moves the camera to the position
+        CameraPosition(
+            bearing: 0,
+            target: LatLng(lat, lng),
+            tilt: 59.440717697143555,
+            zoom: 12)
+    ));
+
     // controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
     //     LatLngBounds(
     //         southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
@@ -350,7 +381,27 @@ class _MapPageState extends State<MapPage> {
           ),
         );
 
+    // getIconMarker(String url,String name,LatLng point,String vicinity) async{
+    //   Uint8List bytes = (await NetworkAssetBundle(Uri.parse(url))
+    //       .load(url))
+    //       .buffer
+    //       .asUint8List();
+    //
+    //   _markers.add(//add is a function on class sets
+    //       Marker(//adding the marker object (which are from the google class) to the _marker sets
+    //         markerId: MarkerId(name),
+    //         position: point,
+    //         icon:BitmapDescriptor.fromBytes(bytes),
+    //         infoWindow: InfoWindow(
+    //             title: name,
+    //             snippet: vicinity),
+    //       ),
+    //   );
+    //
+    // }
 
+    bool user_ratings_total = false;
+    bool opening_hours =false;
   Widget nearbyPlacesWidget(List<dynamic> nearbyPlaces)=>
       Expanded(
         flex:4,
@@ -358,57 +409,129 @@ class _MapPageState extends State<MapPage> {
           itemCount: nearbyPlaces.length,
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index){
-            return Container(
-              margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                    bottomLeft: Radius.circular(10),
-                    bottomRight: Radius.circular(10)
+            if(nearbyPlaces[index]['opening_hours']==null){
+              opening_hours=false;
+            }else if(nearbyPlaces[index]['opening_hours']==false){
+              opening_hours=false;
+            }else{
+              opening_hours=true;
+            };
+
+            if(nearbyPlaces[index]['user_ratings_total']==null){
+              user_ratings_total = false;
+            }else{
+              user_ratings_total = true;
+            };
+            var location = nearbyPlaces[index]['geometry']['location'];
+            LatLng latlng = LatLng(location['lat'], location['lng']);
+            print("LATLNG IS: "+latlng.toString());
+            // if(nearbyPlaces[index]['photos'][0]['photo_reference']==null){
+            //   getIconMarker('https://www.northernlightspizza.com/wp-content/uploads/2017/01/image-placeholder.jpg',nearbyPlaces[index]['name'],latlng,nearbyPlaces[index]['vicinity']);
+            // }else{
+            //   getIconMarker(nearbyPlaces[index]['photos'][0]['photo_reference'],nearbyPlaces[index]['name'],latlng,nearbyPlaces[index]['vicinity']);
+            // }
+
+            _markers.add(//add is a function on class sets
+              Marker(//adding the marker object (which are from the google class) to the _marker sets
+                  markerId: MarkerId(nearbyPlaces[index]['name']),
+                  position: latlng,
+                  icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+                  infoWindow: InfoWindow(
+                    title: nearbyPlaces[index]['name'],
+                    snippet: nearbyPlaces[index]['vicinity']),
+              ),
+            );
+            return InkWell(
+              child: Container(
+                margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
+                decoration: BoxDecoration(
+                  color: Colors.white70,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: Offset(0, 3), // changes position of shadow
-                  ),
-                ],
-              ),
-              child:Row(
-                children:[
-                  Expanded(
-                    child: Column(
-                      children:[
-                        Container(
-                          padding:EdgeInsets.all(10),
-                            child: Text(nearbyPlaces[index]['name'],),
-                        ),
-                        Container(
-                          padding:EdgeInsets.all(10),
-                          alignment: Alignment.centerLeft,
-                          color: Colors.teal,
-                          child: Text('rating '+nearbyPlaces[index]['rating'].toString(),
-                          //textAlign: TextAlign.left,
+                child:Row(
+                  children:[
+                    Expanded(
+                      child: Column(
+                        children:[
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            padding:EdgeInsets.all(10),
+                              child: Text(nearbyPlaces[index]['name'],
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                           ),
-                        ),
-                        Text("test"/*nearbyPlaces[index]['open_now'] ? 'open now':'closed'*/),
-                      ]
+                          Container(
+                            child:Row(
+                              children: [
+                                Container(
+                                  padding:EdgeInsets.all(10),
+                                  alignment: Alignment.centerLeft,
+                                  child: Text('Rating: '+nearbyPlaces[index]['rating'].toString()+"/5",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Container(
+                                  child: Visibility(
+                                    visible:user_ratings_total,
+                                    child: Text(" ("+nearbyPlaces[index]['user_ratings_total'].toString()+")",
+                                      textAlign: TextAlign.center,),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            padding:EdgeInsets.all(10),
+                              child: Visibility(
+                                visible:opening_hours,
+                                  child: Text(opening_hours ? 'open now':'closed',
+                                    textAlign: TextAlign.center),
+                              ),
+                          ),
+                        ]
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: FittedBox(
-                      child: FlutterLogo(), /*LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']) != null
-                          ? Image.network(
-                        LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']).toString(),
-                        fit: BoxFit.cover,
-                      ): CircularProgressIndicator(),*/
-                    ),
-                  )
-                ]
+                    Expanded(
+                    child: nearbyPlaces[index]['photos'] != null && nearbyPlaces[index]['photos'].isNotEmpty ? Image.network(
+                      LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']),
+                      fit: BoxFit.cover,
+                      errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                        return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+                      },
+                    )
+                        : Image.network('https://www.northernlightspizza.com/wp-content/uploads/2017/01/image-placeholder.jpg', fit: BoxFit.cover),
+                      ),
+                  ]
+                ),
               ),
+              onTap: () async{
+                print("The Place is clicked");
+                _getCurrentPosition();
+                print("setting current position: "+_currentPosition.toString());
+                print("latitudez: "+(_currentPosition?.latitude).toString());
+                print("longitudez: "+(_currentPosition?.longitude).toString());
+                var directions = await LocationService().getDirections((_currentPosition?.latitude).toString()+","+(_currentPosition?.longitude).toString(), nearbyPlaces[1]['geometry']['location']['lat'].toString()+","+nearbyPlaces[1]['geometry']['location']['lng'].toString());
+                print("RESULT OF DIRECTION IS: "+directions.toString());
+                _goToThePlaceIcon(directions['start_location']['lat'],directions['start_location']['lng']);
+                _setPolyline(directions['polyline_decoded']);
+              },
             );
           }
         )
