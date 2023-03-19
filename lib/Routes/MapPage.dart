@@ -522,13 +522,10 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               onTap: () async{
-                print("The Place is clicked");
+                _markers.clear();
+                _polylines.clear();
                 _getCurrentPosition();
-                print("setting current position: "+_currentPosition.toString());
-                print("latitudez: "+(_currentPosition?.latitude).toString());
-                print("longitudez: "+(_currentPosition?.longitude).toString());
                 var directions = await LocationService().getDirections((_currentPosition?.latitude).toString()+","+(_currentPosition?.longitude).toString(), nearbyPlaces[1]['geometry']['location']['lat'].toString()+","+nearbyPlaces[1]['geometry']['location']['lng'].toString());
-                print("RESULT OF DIRECTION IS: "+directions.toString());
                 _goToThePlaceIcon(directions['start_location']['lat'],directions['start_location']['lng']);
                 _setPolyline(directions['polyline_decoded']);
               },

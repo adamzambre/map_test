@@ -1,7 +1,7 @@
 import 'package:map_test/Constants/Constants.dart';
 //import 'package:airbnb_clone/Model/Property.dart';
 //import 'package:airbnb_clone/Routes/AddProperty.dart';
-import 'package:map_test/Routes/InfoPersonnel.dart';
+import 'package:map_test/Routes/InfoPersonnel2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';

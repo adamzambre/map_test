@@ -134,5 +134,47 @@ class UserInfos {
       return false;
     }
   }
+//////////////////////////////////////////////////////////////////////////////////////////
+  Future<bool> nameExist()async {
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      final docRef = await FirebaseFirestore.instance.collection('Users').doc(
+          uid);
+      final DocumentSnapshot docSnapshot = await docRef.get();
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final bool fieldExists = (docSnapshot.data() as Map<String, dynamic>)
+            .containsKey('name');
+        if (fieldExists) {
+          print('The field exists.');
+          return true;
+        } else {
+          print('The field does not exist.');
+          return false;
+        }
+      } else {
+        print('The document does not exist.');
+        return false;
+      }
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
+  Future<String> getName() async{
+    try{
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      final docRef = await FirebaseFirestore.instance.collection('Users')
+          .doc(uid);
+      final DocumentSnapshot docSnapshot = await docRef.get();
+      String name = docSnapshot.get("name");
+      print(name);
+      return name;
+    }catch(e){
+      print(e.toString());
+      print("Insert Your Name Here");
+      return "Insert Your Name Here";
+    }
+  }
 
 }
