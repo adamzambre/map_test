@@ -44,7 +44,9 @@ class _infoPersonnelState extends State<InfoPersonnel> {
             return SingleChildScrollView(
               child:Column(
 
-                children: [
+                children:
+                [
+                  SizedBox(height:25),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -160,6 +162,7 @@ class _infoPersonnelState extends State<InfoPersonnel> {
                   ),
                   SizedBox(height:25),
                   Container(
+                      padding:  EdgeInsets.fromLTRB(10,8,10,10),
                     child:FloatingActionButton.extended(
                       label:Text("Edit your profile",style:TextStyle(color:Colors.black,fontSize:14,fontWeight: FontWeight.w400)),
                       backgroundColor: Colors.teal,

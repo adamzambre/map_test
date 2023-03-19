@@ -86,6 +86,8 @@ class _editInfoPersonnelState extends State<EditInfoPersonnel> {
                             alignment: Alignment.topLeft,
                             padding:  EdgeInsets.symmetric(horizontal: 10),
                             child: TextField(
+                              minLines: 1,
+                              maxLines: 100,
                               controller:bioController,
                               decoration: InputDecoration(
                                 hintText:"Enter your name here",
