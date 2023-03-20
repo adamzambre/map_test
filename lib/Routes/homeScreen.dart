@@ -83,11 +83,12 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height:10),
             Container(
               child: StreamBuilder(
-                stream: FirebaseFirestore.instance.collection("Users").where(
-                  "Country", isEqualTo: countryValue)
-                  .where("State", isEqualTo: stateValue)
-                  .where("City", isEqualTo: cityValue)
-                  .snapshots(),
+                stream: FirebaseFirestore.instance.collection("Users")
+                    .where("userType", isEqualTo: "local tour guide")
+                    .where("country", isEqualTo: countryValue)
+                    .where("state", isEqualTo: stateValue)
+                    .where("city", isEqualTo: cityValue)
+                    .snapshots(),
     //FirebaseFirestore.instance.collection("Users").snapshots(),//
     //retrieveLocals(countryValue,stateValue,cityValue,whichMethod),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
@@ -100,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListView(
                       children: snapshot.data!.docs.map((document) {
                         return Card(
+                          color: Colors.white54,
                           child: new InkWell(
                             onTap: () {
                               //Navigator.push(
@@ -114,11 +116,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Column(
                               children:[
                                 Container(
-                                  child: Image.network(document.get('PPUrl')),
+                                  child: Image.network(document.get('picUri')),
                                 ),
                                 ExpansionTile(
                                   title:Text(
-                                    document.get('Name'),
+                                    document.get('name'),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 21,
@@ -128,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        "${document.get('Country')},${document.get('State')}, ${document.get('City')}",
+                                        "${document.get('country')},${document.get('state')}, ${document.get('city')}",
                                         style:TextStyle(
                                           fontSize: 15,
                                         ),

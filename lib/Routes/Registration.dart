@@ -102,7 +102,7 @@ class _RegistrationState extends State<Registration> {
                 activeStep++;
               });
             }else if(activeStep==2){
-              dynamic result = await userInfos.addNameAndAgeAndBiodata(nameController.text,ageController.text,biodataController.text);
+              dynamic result = await userInfos.addNameAndAgeAndBiodataAndSex(nameController.text,ageController.text,biodataController.text,"This shouldnt be here");
               bool result1 = await userInfos.addCountryStateCity(countryValue,stateValue,cityValue);
               if(result==true&&result1==true){
                 Navigator.pushReplacement(

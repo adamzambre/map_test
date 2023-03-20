@@ -5,6 +5,7 @@ import 'package:csc_picker/csc_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:map_test/Routes/InfoPersonnel2.dart';
 import 'package:map_test/Services/user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:map_test/Services/authententication.dart';
@@ -17,6 +18,7 @@ class EditInfoPersonnel extends StatefulWidget {
 class _editInfoPersonnelState extends State<EditInfoPersonnel> {
 
   AuthService customAuth = new AuthService();
+  UserInfos userInfos = new UserInfos();
   String uid = FirebaseAuth.instance.currentUser!.uid;
   String profilePicLink = "";
 
@@ -185,8 +187,19 @@ class _editInfoPersonnelState extends State<EditInfoPersonnel> {
                         child:FloatingActionButton.extended(
                           label:Text("Update your profile",style:TextStyle(color:Colors.black,fontSize:14,fontWeight: FontWeight.w400)),
                           backgroundColor: Colors.teal,
-                          onPressed: (){
+                          onPressed: ()async {
                             print("button pressed");
+                            bool result = await userInfos.addNameAndAgeAndBiodataAndSex(nameController.text,ageController.text,bioController.text,sex);
+                            bool result1 = await userInfos.addCountryStateCity(countryValue,stateValue,cityValue);
+                            print("result:"+result.toString());
+                            print("result1:"+result1.toString());
+                            if(result==true&&result1==true){
+                              Navigator.pop(context);
+                            }else{
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("make sure you fill in the correct details in each section")),
+                              );
+                            }
                           },
                         )
                     )

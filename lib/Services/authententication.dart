@@ -130,10 +130,20 @@ class AuthService {
     String error="working fine like it should";
     String uid = FirebaseAuth.instance.currentUser!.uid;
     try{
-      CollectionReference collectionReference = FirebaseFirestore.instance
-          .collection('Users');
-      collectionReference.add({"uid":uid});
-      collectionReference.add({"userType":"LocalTourGuide"});
+      DocumentReference docRef = FirebaseFirestore.instance
+          .collection('Users').doc(uid);
+      docRef.set({
+        "uid": uid,
+        "name": "",
+        "age":"",
+        "sex":"",
+        "biodata": "",
+        "country":"",
+        "state":"",
+        "city":"",
+        "picUri":"",
+        "userType":"local tour guide",
+      });
       return [true,error];
     }catch(e){
       print(e.toString());

@@ -13,21 +13,24 @@ import 'package:map_test/Services/authententication.dart';
 
 class UserInfos {
 
-  Future<bool?> addNameAndAgeAndBiodata(String name, String age, String biodata) async {
+  Future<bool> addNameAndAgeAndBiodataAndSex(String name, String age, String biodata,String sex) async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference = FirebaseFirestore.instance
           .collection('Users')
           .doc(uid);
-      FirebaseFirestore.instance.runTransaction((
-          transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
+      print("func is running");
+      print("name:"+name);
+      print("age:"+age);
+      print("biodata:"+biodata);
+      print("sex:"+sex);
+      FirebaseFirestore.instance.runTransaction((transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-        if (!snapshot.exists) {
-          documentReference.set({"Name": name,"age": age, "biodata": biodata});
-          return true;
-        }
+          documentReference.update({"name": name,"age": age, "biodata": biodata,"sex":sex});
+          print("success");
       });
+      return true;
     } catch (e) {
       print(e.toString());
       return false;
@@ -43,7 +46,8 @@ class UserInfos {
       FirebaseFirestore.instance.runTransaction((transaction) async {//run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-        documentReference.update({"Country": Country,"State": State, "City": City});
+        documentReference.update({"country": Country,"state": State, "city": City});
+        print("success");
       });
       return true;
     }catch(e){

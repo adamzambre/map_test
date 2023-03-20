@@ -3,6 +3,7 @@ import 'package:map_test/Constants/Constants.dart';
 import 'package:flutter/material.dart';
 import 'package:map_test/Map.dart';
 import 'package:map_test/Routes/HomePage.dart';
+import 'package:map_test/Routes/local_tour_guides/HomePageLTG.dart';
 import 'package:map_test/Services/authententication.dart';
 import 'package:map_test/Routes/Registration.dart';
 //import 'HomePage.dart';
@@ -149,39 +150,103 @@ class _LoginState extends State<Login> {
                         }
                       }
                     }else if(LocalTourGuide==true){
-                      print("Local Tour Guide is logging in ");
-                      if (emailController.text.isEmpty || !emailController.text.contains('@')) {
-                        // Display an error message if the email is invalid
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please enter a valid email')),
-                        );
-                      }else if(passwordController.text.isEmpty || passwordController.text.length < 6){
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please enter a valid password')),
-                        );
-                      }else{
-                        dynamic result = await _auth.LocalTourGuideLogIn(emailController.text, passwordController.text);
-                        dynamic result2 = await _auth.addLocalTourGuideUid();
-                        if(result[0]&&result2[0]){
-                          Navigator.push(
-                              context,MaterialPageRoute(
-                              builder: (context) => HomePage()
-                          )
-                          );
-                        }if(!result[0]){
+                      ///////////////////////////////start dari sini nak sign in local tour guide secara sendiri
+                      if(!newUser){//user log in
+                        print("local is logging in ");
+                        if (emailController.text.isEmpty || !emailController.text.contains('@')) {
+                          // Display an error message if the email is invalid
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(result[1])),
+                            SnackBar(content: Text('Please enter a valid email')),
                           );
-                        }else if(!result2[0]){
+                        }else if(passwordController.text.isEmpty || passwordController.text.length < 6){
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(result2[1])),
+                            SnackBar(content: Text('Please enter a valid password')),
                           );
                         }else{
+                          dynamic result = await _auth.LocalTourGuideLogIn(emailController.text, passwordController.text);
+                          if(result[0]){
+                            Navigator.push(
+                                context,MaterialPageRoute(
+                              builder: (context) =>HomePageLTG(),
+                            )
+                            );
+                          }else{
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result[1])),
+                            );
+                          }
+                        }
+                      }else{//user creates an account
+                        print("local creates an account");
+                        if (emailController.text.isEmpty || !emailController.text.contains('@')) {
+                          // Display an error message if the email is invalid
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Database error")),
+                            SnackBar(content: Text('Please enter a valid email')),
                           );
+                        }else if(passwordController.text.isEmpty || passwordController.text.length < 6){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please enter a valid password')),
+                          );
+                        }else{
+                          dynamic result = await _auth.LocalTourGuideSignUp(emailController.text, passwordController.text);
+                          dynamic result2 = await _auth.addLocalTourGuideUid();
+                          if(result[0]&&result2[0]){
+                            Navigator.push(
+                                context,MaterialPageRoute(
+                                builder: (context) => HomePageLTG()
+                            )
+                            );
+                          }else{
+                            if(!result[0]){
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result[1])),
+                              );
+                            }else if(!result2[0]){
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result2[1])),
+                              );
+                            }else{
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Database error")),
+                              );
+                            }
+                          }
                         }
                       }
+                      ///////////////////////////////sampai sini
+                      // print("Local Tour Guide is logging in ");//ni just so local tour guide boleh log in je
+                      // if (emailController.text.isEmpty || !emailController.text.contains('@')) {
+                      //   // Display an error message if the email is invalid
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(content: Text('Please enter a valid email')),
+                      //   );
+                      // }else if(passwordController.text.isEmpty || passwordController.text.length < 6){
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(content: Text('Please enter a valid password')),
+                      //   );
+                      // }else{
+                      //   dynamic result = await _auth.LocalTourGuideLogIn(emailController.text, passwordController.text);
+                      //   dynamic result2 = await _auth.addLocalTourGuideUid();
+                      //   if(result[0]&&result2[0]){
+                      //     Navigator.push(
+                      //         context,MaterialPageRoute(
+                      //         builder: (context) => HomePage()
+                      //     )
+                      //     );
+                      //   }if(!result[0]){
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(content: Text(result[1])),
+                      //     );
+                      //   }else if(!result2[0]){
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(content: Text(result2[1])),
+                      //     );
+                      //   }else{
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(content: Text("Database error")),
+                      //     );
+                      //   }
+                      // }
                     }else{
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Bruh, select a user type")),
@@ -348,6 +413,7 @@ class _LoginState extends State<Login> {
                 LocalTourGuide=false;
               });
             }
+            print("value of local tour guide: "+LocalTourGuide.toString());
           },
           onSaved: (value) {
             // selectedValue = value.toString();
@@ -378,7 +444,7 @@ class _LoginState extends State<Login> {
 
   Widget UserSigninOrLogIn()=>
       Visibility(
-        visible: !LocalTourGuide,
+        visible: true,//!LocalTourGuide,////////////////////////ni set ke true je supaya senang ltg nak sign up sendiri
         child: InkWell(
           onTap: () {
             setState(() {

@@ -6,12 +6,12 @@ import 'package:map_test/Services/user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:map_test/Services/authententication.dart';
 
-class InfoPersonnel extends StatefulWidget {
+class InfoPersonnelLTG extends StatefulWidget {
   @override
-  _infoPersonnelState createState() => _infoPersonnelState();
+  _infoPersonnelLTGState createState() => _infoPersonnelLTGState();
 }
 
-class _infoPersonnelState extends State<InfoPersonnel> {
+class _infoPersonnelLTGState extends State<InfoPersonnelLTG> {
 
   @override
   Widget build(BuildContext context){
@@ -40,11 +40,11 @@ class _infoPersonnelState extends State<InfoPersonnel> {
             final cityFB = data["city"]!="" ? data['city'] : 'please insert city';
             final picUri = data["picUri"]!="" ? data['picUri'] : 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg';
             return SingleChildScrollView(
-              child:Column(
+                child:Column(
 
-                children:
-                [
-                  SizedBox(height:25),
+                  children:
+                  [
+                    SizedBox(height:25),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -64,7 +64,7 @@ class _infoPersonnelState extends State<InfoPersonnel> {
                     SizedBox(height:25),
                     Container(
                         padding: EdgeInsets.symmetric(vertical:8.0,horizontal: 10),
-                      height:MediaQuery.of(context).size.height *0.3,
+                        height:MediaQuery.of(context).size.height *0.3,
                         width:MediaQuery.of(context).size.width,
                         color: Colors.teal,
                         child:CircleAvatar(
@@ -73,7 +73,7 @@ class _infoPersonnelState extends State<InfoPersonnel> {
                           backgroundImage: NetworkImage(picUri),
                         )
                     ),
-                  SizedBox(height:25),
+                    SizedBox(height:25),
                     Column(
                       children:[
                         Container(
@@ -88,93 +88,93 @@ class _infoPersonnelState extends State<InfoPersonnel> {
                         )
                       ],
                     ),
-                  SizedBox(height:25),
-                  Column(
-                    children:[
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding:  EdgeInsets.fromLTRB(10,8,10,10),
-                        child: Text("Biodata",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding:  EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(bioFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
-                      )
-                    ]
-                  ),
-                  SizedBox(height:25),
-                  Column(
-                      children:[
+                    SizedBox(height:25),
+                    Column(
+                        children:[
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                            child: Text("Biodata",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          ),
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(bioFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
+                          )
+                        ]
+                    ),
+                    SizedBox(height:25),
+                    Column(
+                        children:[
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                            child: Text("Age",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          ),
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(ageFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
+                          )
+                        ]
+                    ),
+                    SizedBox(height:25),
+                    Column(
+                        children:[
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                            child: Text("Sex",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          ),
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(sexFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
+                          )
+                        ]
+                    ),
+                    SizedBox(height:25),
+                    Column(
+                      children: [
                         Container(
                           alignment: Alignment.topLeft,
                           padding:  EdgeInsets.fromLTRB(10,8,10,10),
-                          child: Text("Age",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          child: Text("Place of origin",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
                         ),
                         Container(
                           alignment: Alignment.topLeft,
                           padding:  EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(ageFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
-                        )
-                      ]
-                  ),
-                  SizedBox(height:25),
-                  Column(
-                      children:[
-                        Container(
-                          alignment: Alignment.topLeft,
-                          padding:  EdgeInsets.fromLTRB(10,8,10,10),
-                          child: Text("Sex",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          child: Text("Country: "+ countryFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
                         ),
                         Container(
                           alignment: Alignment.topLeft,
                           padding:  EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(sexFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
+                          child: Text("State: "+stateFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
+                        ),
+                        Container(
+                          alignment: Alignment.topLeft,
+                          padding:  EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("City: "+cityFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
                         )
-                      ]
-                  ),
-                  SizedBox(height:25),
-                  Column(
-                    children: [
-                      Container(
-                        alignment: Alignment.topLeft,
+                      ],
+                    ),
+                    SizedBox(height:25),
+                    Container(
                         padding:  EdgeInsets.fromLTRB(10,8,10,10),
-                        child: Text("Place of origin",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding:  EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("Country: "+ countryFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding:  EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("State: "+stateFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding:  EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("City: "+cityFB,style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w400)),
-                      )
-                    ],
-                  ),
-                  SizedBox(height:25),
-                  Container(
-                      padding:  EdgeInsets.fromLTRB(10,8,10,10),
-                    child:FloatingActionButton.extended(
-                      label:Text("Edit your profile",style:TextStyle(color:Colors.black,fontSize:14,fontWeight: FontWeight.w400)),
-                      backgroundColor: Colors.teal,
-                      onPressed: (){
-                        print("button pressed");
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => EditInfoPersonnel()),
-                        );
-                      },
+                        child:FloatingActionButton.extended(
+                          label:Text("Edit your profile",style:TextStyle(color:Colors.black,fontSize:14,fontWeight: FontWeight.w400)),
+                          backgroundColor: Colors.teal,
+                          onPressed: (){
+                            print("button pressed");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => EditInfoPersonnel()),
+                            );
+                          },
+                        )
                     )
-                  )
-                ],
-              )
+                  ],
+                )
             );
           }
       ),
