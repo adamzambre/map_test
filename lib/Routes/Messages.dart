@@ -33,7 +33,7 @@ class _MessagesState extends State<Messages> {
                   onPressed: (){
                     Navigator.pop(context);
                   },),
-                Text("Notifications")
+                Text("Notificationsz")
               ],
             ),
             Expanded(
