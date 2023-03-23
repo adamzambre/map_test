@@ -26,13 +26,13 @@ class _infoPersonnelState extends State<InfoPersonnel> {
     }
   }
 
-  Future<String> name(){
-    if(nameExist()==true){
-      return userInformation.getName();
-    }else{
-      return userInformation.getName();
-    }
-  }
+  // Future<String> name(){
+  //   if(nameExist()==true){
+  //     return userInformation.getName();
+  //   }else{
+  //     return userInformation.getName();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context){

@@ -5,6 +5,7 @@ import 'package:map_test/Routes/local_tour_guides/MessagesLTG.dart';
 import 'package:map_test/Routes/Properties.dart';
 import 'package:map_test/Routes/MapPage.dart';
 import 'package:map_test/Routes/homeScreen.dart';
+import 'package:map_test/Routes/Messages.dart';
 import 'package:flutter/material.dart';
 //import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -30,7 +31,7 @@ void main() => runApp(
 
 class HomePageLTGState extends State<HomePageLTG> {
   int _currentTab=0;
-  List<Widget> _children=[MessagesLTG(),ProfileLTG()];
+  List<Widget> _children=[Messages(),ProfileLTG()];
 
   @override
   Widget build(BuildContext context) {

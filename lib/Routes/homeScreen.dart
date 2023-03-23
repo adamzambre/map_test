@@ -6,6 +6,7 @@ import 'package:map_test/Routes/Profile.dart';
 //import 'package:map_test/Routes/SearchScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:map_test/Routes/chat.dart';
 
 void main()=>runApp(
     MaterialApp(
@@ -89,8 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     .where("state", isEqualTo: stateValue)
                     .where("city", isEqualTo: cityValue)
                     .snapshots(),
-    //FirebaseFirestore.instance.collection("Users").snapshots(),//
-    //retrieveLocals(countryValue,stateValue,cityValue,whichMethod),
+
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
                   if(!snapshot.hasData){//kalau data takde
                     return Center(
@@ -152,9 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: FloatingActionButton.extended(
                                       label: Text("Contact me!"),
                                       onPressed: () {
+
                                         Navigator.push(
                                           context, MaterialPageRoute(
-                                            builder: (context) => Messages()
+                                            builder: (context) => Chat(document:document)
                                           ),
                                         );
                                       },

@@ -259,7 +259,7 @@ class _MapPageState extends State<MapPage> {
         );
       });
     }).catchError((e) {
-      debugPrint(e);
+      debugPrint(e.toString());
     });
   }
 

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -13,22 +14,25 @@ import 'package:map_test/Services/authententication.dart';
 
 class UserInfos {
 
-  Future<bool> addNameAndAgeAndBiodataAndSex(String name, String age, String biodata,String sex) async {
+  Future<bool> addNameAndAgeAndBiodataAndSex(String name, String age,
+      String biodata, String sex) async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference = FirebaseFirestore.instance
           .collection('Users')
           .doc(uid);
       print("func is running");
-      print("name:"+name);
-      print("age:"+age);
-      print("biodata:"+biodata);
-      print("sex:"+sex);
-      FirebaseFirestore.instance.runTransaction((transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
+      print("name:" + name);
+      print("age:" + age);
+      print("biodata:" + biodata);
+      print("sex:" + sex);
+      FirebaseFirestore.instance.runTransaction((
+          transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-          documentReference.update({"name": name,"age": age, "biodata": biodata,"sex":sex});
-          print("success");
+        documentReference.update(
+            {"name": name, "age": age, "biodata": biodata, "sex": sex});
+        print("success");
       });
       return true;
     } catch (e) {
@@ -37,38 +41,41 @@ class UserInfos {
     }
   }
 
-  Future<bool> addCountryStateCity(String? Country, String? State,String? City) async{
-    try{
+  Future<bool> addCountryStateCity(String? Country, String? State,
+      String? City) async {
+    try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference = FirebaseFirestore.instance
           .collection('Users')
           .doc(uid);
-      FirebaseFirestore.instance.runTransaction((transaction) async {//run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
+      FirebaseFirestore.instance.runTransaction((
+          transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-        documentReference.update({"country": Country,"state": State, "city": City});
+        documentReference.update(
+            {"country": Country, "state": State, "city": City});
         print("success");
       });
       return true;
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       return false;
     }
   }
 
-  Future getImage(File? image) async{
-    try{
+  Future getImage(File? image) async {
+    try {
       final images = await ImagePicker().pickImage(source: ImageSource.gallery);
       image = images as File;
       print('Image Path $image');
       return image;
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       return null;
     }
   }
 
-  Future pickUploadImage(BuildContext context, File image) async{
+  Future pickUploadImage(BuildContext context, File image) async {
     try {
       AuthService customAuth = new AuthService();
       String uid = await customAuth.getUid();
@@ -77,24 +84,25 @@ class UserInfos {
           .child("$fileName");
       UploadTask uploadTask = ref.putFile(File("$image"));
       return uploadTask;
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       return null;
     }
   }
-  void createSubCollectionContacts() async{
+
+  void createSubCollectionContacts() async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       CollectionReference collectionReference = await FirebaseFirestore.instance
           .collection('Users')
           .doc(uid).collection('Contacts');
       print("jadi");
-    }catch(e){
+    } catch (e) {
       print(e.toString());
     }
   }
 
-  void createSubCollectionPlaceToGo() async{
+  void createSubCollectionPlaceToGo() async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       CollectionReference collectionReference = await FirebaseFirestore.instance
@@ -102,19 +110,26 @@ class UserInfos {
           .doc(uid)
           .collection('Places To Go');
       print("jadi");
-    }catch(e){
+    } catch (e) {
       print(e.toString());
     }
   }
 
-  Future<bool?> addReview(QueryDocumentSnapshot<Object?> document,String comment) async {
+  Future<bool?> addReview(QueryDocumentSnapshot<Object?> document,
+      String comment) async {
     final now = new DateTime.now();
     String formatter = DateFormat('yMd').format(now);
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    var Name = await FirebaseFirestore.instance.collection('Users').doc(uid).get().then((value) {
+    var Name = await FirebaseFirestore.instance.collection('Users')
+        .doc(uid)
+        .get()
+        .then((value) {
       return value.data()?['Name']; // Access your after your get the data
     });
-    String PPUrl = await FirebaseFirestore.instance.collection('Users').doc(uid).get().then((value){
+    String PPUrl = await FirebaseFirestore.instance.collection('Users')
+        .doc(uid)
+        .get()
+        .then((value) {
       return value.data()?['PPUrl']; // Access your after your get the data
     });
 
@@ -128,8 +143,14 @@ class UserInfos {
           transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-        if (!snapshot.exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
-          documentReference.set({"Name": Name, "PPUrl":PPUrl, "Comment": comment, "Date": formatter});
+        if (!snapshot
+            .exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
+          documentReference.set({
+            "Name": Name,
+            "PPUrl": PPUrl,
+            "Comment": comment,
+            "Date": formatter
+          });
           return true;
         }
       });
@@ -138,8 +159,9 @@ class UserInfos {
       return false;
     }
   }
+
 //////////////////////////////////////////////////////////////////////////////////////////
-  Future<bool> nameExist()async {
+  Future<bool> nameExist() async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       final docRef = await FirebaseFirestore.instance.collection('Users').doc(
@@ -165,19 +187,49 @@ class UserInfos {
     }
   }
 
-  Future<String> getName() async{
-    try{
-      String uid = FirebaseAuth.instance.currentUser!.uid;
+  Future<String> getName(String Receiveruid) async {
+    try {
+      //String uid = FirebaseAuth.instance.currentUser!.uid;
       final docRef = await FirebaseFirestore.instance.collection('Users')
-          .doc(uid);
+          .doc(Receiveruid);
       final DocumentSnapshot docSnapshot = await docRef.get();
       String name = docSnapshot.get("name");
       print(name);
       return name;
-    }catch(e){
+    } catch (e) {
       print(e.toString());
-      print("Insert Your Name Here");
-      return "Insert Your Name Here";
+      return "no name";
+    }
+  }
+
+  Future<String> getPicUri(String Receiveruid) async {
+    try {
+      //String uid = FirebaseAuth.instance.currentUser!.uid;
+      final docRef = await FirebaseFirestore.instance.collection('Users').doc(
+          Receiveruid);
+      final DocumentSnapshot docSnapshot = await docRef.get();
+      String picUri = docSnapshot.get("picUri");
+      return picUri;
+    } catch (e) {
+      print(e.toString());
+      return "no uriPic";
+    }
+  }
+
+  Future<String> getLastMessage(String Receiveruid) async {
+    String lastMessage = "";
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      final ColRef = await FirebaseFirestore.instance.collection('Users').doc(uid).collection('chat').doc(Receiveruid).collection('messsages');
+      Query query = await ColRef.orderBy("createdAt", descending: true).limit(1);
+      QuerySnapshot querySnapshot = await query.get();
+      DocumentSnapshot lastDocSnapshot = querySnapshot.docs.last;
+      print("lastDocSnapshot: "+lastDocSnapshot.id);
+      lastMessage = lastDocSnapshot['content'];
+      return lastMessage;
+    } catch (e) {
+      print(e.toString());
+      return lastMessage;
     }
   }
 
