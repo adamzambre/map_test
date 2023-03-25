@@ -46,7 +46,7 @@ class _MessagesState extends State<Messages> {
                 stream: FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).collection("chat").snapshots(),
                 builder:(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
                   print(FirebaseAuth.instance.currentUser!.uid);
-                  print(snapshot.data!.docs.toString());
+                  print(snapshot.data?.docs.toString());
 
                   if(snapshot.hasError){
                     return Center(

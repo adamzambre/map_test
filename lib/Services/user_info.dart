@@ -14,8 +14,8 @@ import 'package:map_test/Services/authententication.dart';
 
 class UserInfos {
 
-  Future<bool> addNameAndAgeAndBiodataAndSex(String name, String age,
-      String biodata, String sex) async {
+  Future<bool> addInfo(String name, String age,
+      String biodata, String? sex, String country, String? state, String? city) async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference = FirebaseFirestore.instance
@@ -25,13 +25,19 @@ class UserInfos {
       print("name:" + name);
       print("age:" + age);
       print("biodata:" + biodata);
-      print("sex:" + sex);
+      print("sex:" + sex.toString());
+      print("country:" + country);
+      print("state:" + state.toString());
+      print("city:" + city.toString());
+      if(sex==null){
+        sex="";
+      }
       FirebaseFirestore.instance.runTransaction((
           transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
         documentReference.update(
-            {"name": name, "age": age, "biodata": biodata, "sex": sex});
+            {"name": name, "age": age, "biodata": biodata, "sex": sex, "country":country, "state":state, "city":city});
         print("success");
       });
       return true;

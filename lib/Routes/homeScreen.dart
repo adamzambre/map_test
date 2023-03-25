@@ -7,6 +7,7 @@ import 'package:map_test/Routes/Profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:map_test/Routes/chat.dart';
+import 'package:map_test/Routes/profileView.dart';
 
 void main()=>runApp(
     MaterialApp(
@@ -104,11 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white54,
                           child: new InkWell(
                             onTap: () {
-                              //Navigator.push(
-                                //context, MaterialPageRoute(
-                                  //builder: (context) => LocalProfilePage(document: document),
-                                //),
-                              //);
+                              Navigator.push(
+                                context, MaterialPageRoute(
+                                  builder: (context) => ProfileView(document: document),
+                                ),
+                              );
                             },
     //borderOnForeground: true,
                           child: SingleChildScrollView(
