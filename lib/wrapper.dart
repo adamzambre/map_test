@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:map_test/Routes/HomePage.dart';
 import 'package:map_test/Routes/homeScreen.dart';
+import 'package:map_test/wrapper2.dart';
 import 'package:provider/provider.dart';
 import 'package:map_test/Model/user.dart';
 import 'package:map_test/Map.dart';
@@ -23,7 +24,7 @@ class Wrapper extends StatelessWidget {
       return Login();
     //return HomePage();
     }else{
-      return HomePage();//Firebase automatically persists the user credentials locally, and tries to restore those when the app is restarted.
+      return Wrapper2();//Firebase automatically persists the user credentials locally, and tries to restore those when the app is restarted.
       //To sign the user out, you have to explicitly sign the user out by calling await FirebaseAuth.instance.signOut().
       return InfoPersonnel();
     };

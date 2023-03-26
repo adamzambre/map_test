@@ -87,6 +87,20 @@ class _MapPageState extends State<MapPage> {
       });
     }
 
+  void _setMarkerAttractions(String name,String vicinity,String photoUri, LatLng latlng) async{//adds the marker to the set of markers (sets of markers are the variables located above)
+
+      _markers.add(//add is a function on class sets
+        Marker(//adding the marker object (which are from the google class) to the _marker sets
+          markerId: MarkerId(name),
+          position: latlng,
+          icon: await MarkerIcon.downloadResizePictureCircle(LocationService().getPhoto(photoUri), size: 150, addBorder: true, borderColor: Colors.white, borderSize: 15),//BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: InfoWindow(
+              title: name,
+              snippet: vicinity),
+        ),
+      );
+  }
+
     void _setPolygon(){//setiap kali on tap screen, tambah lines on map (NOT POLYLINES)
       final String polygonIdVal = 'polygon_$_polygonIdCounter';
       _polygonIdCounter++;
@@ -105,21 +119,22 @@ class _MapPageState extends State<MapPage> {
     final String polylineIdVal = 'polyline_$_polylineIdCounter';
     _polylineIdCounter++;
 
-    _polylines.add(
-      Polyline(
-        polylineId: PolylineId(polylineIdVal),
-        width: 2,
-        color:Colors.blue,
-        points:points.map((point)=>LatLng(point.latitude,point.longitude)).toList(),//the lat and lng is from the variable diterima
-      ),
-    );
+    setState(() {
+      _polylines.add(
+        Polyline(
+          polylineId: PolylineId(polylineIdVal),
+          width: 3,
+          color:Colors.blue,
+          points:points.map((point)=>LatLng(point.latitude,point.longitude)).toList(),//the lat and lng is from the variable diterima
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset:false,//so that bila keyboard appears dia tak kecikkan container preferences
-      appBar:AppBar(title:Text('Chicken Soups'),),
       body: Column(
         children: [
             Row(
@@ -129,7 +144,7 @@ class _MapPageState extends State<MapPage> {
                       child: TextFormField(
                           controller: _destinationController,
                           textCapitalization: TextCapitalization.words,
-                          decoration: InputDecoration(hintText: "Search by heart origin"),
+                          decoration: InputDecoration(hintText: "Search by location"),
                           onChanged: (value){
                             print(value);
                           },
@@ -141,28 +156,19 @@ class _MapPageState extends State<MapPage> {
                   ),
                 IconButton(onPressed: () async{
                   var placeDetails = await LocationService().getPlace(_destinationController.text);//get details of destination
-                  print('placeDetails vartype is: '+ placeDetails.runtimeType.toString());
+                  setState((){
+                    _markers.clear();
+                    _polylines.clear();
+                  }
+                  );
                   _goToThePlace(placeDetails);
                   latitudeDestination=placeDetails['geometry']['location']['lat'];
                   longitudeDestination=placeDetails['geometry']['location']['lng'];
                   print(latitudeDestination);
                   print(longitudeDestination);
                   var weatherDetails = await WeatherService().getWeather(latitudeDestination, longitudeDestination);
-                  print("CHIKENDOODA: "+preferences[selectedPreferenceIndex].toString());
                   var nearbyPlaces = await LocationService().getNearbyPlaces(latitudeDestination, longitudeDestination,preferences[selectedPreferenceIndex]);
-                  print('nearbyPlaces vartype is: '+ nearbyPlaces.runtimeType.toString());
                   showModalBottomSheet(context: context, builder: (context)=>buildSheet(weatherDetails,nearbyPlaces),);
-
-                  // var directions = await LocationService().getDirections(_originController.text, _destinationController.text);
-                  //
-                  // _goToThePlace(
-                  //     directions['start_location']['lat'],
-                  //     directions['start_location']['lng'],
-                  //     directions['bounds_ne'],
-                  //     directions['bounds_sw'],
-                  // );
-                  //
-                  // _setPolyline(directions['polyline_decoded']);
                 },icon:Icon(Icons.search),),
               ],
             ),
@@ -181,12 +187,6 @@ class _MapPageState extends State<MapPage> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
-              onTap: (point){//mmng function google yg trima latlng
-                setState(() {
-                  polygonLatLng.add(point);//add to the list
-                  _setPolygon();//drops the polygon on the map
-                });
-              },
             ),
           ),
         ],
@@ -196,12 +196,10 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _goToThePlace(Map<String, dynamic> place) async {//change camera position to the one we searched for and then create a new marker there (ni dulu)
-                                                            //updates camera position to include both origin and destination while making marker for the origin
+      // updates camera position to include both origin and destination while making marker for the origin
     final double lat = place['geometry']['location']['lat'];
     final double lng = place['geometry']['location']['lng'];
-
     final GoogleMapController controller = await _controller.future;
-
     controller.animateCamera(CameraUpdate.newCameraPosition(//ni x pakai since we need origin and destination but this bascially moves the camera to the position
         CameraPosition(
             bearing: 0,
@@ -209,25 +207,12 @@ class _MapPageState extends State<MapPage> {
             tilt: 59.440717697143555,
             zoom: 12)
     ));
-    
-    // controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
-    //     LatLngBounds(
-    //         southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
-    //         northeast: LatLng(boundsNe['lat'],boundsNe['lng']),
-    //     ),
-    //     25)
-    // );
-
     _setMarker(LatLng(lat, lng));
   }
 
   Future<void> _goToThePlaceIcon(double lat, double lng) async {//change camera position to the one we searched for and then create a new marker there (ni dulu)
     //updates camera position to include both origin and destination while making marker for the origin
-    // final double lat = place['geometry']['location']['lat'];
-    // final double lng = place['geometry']['location']['lng'];
-
     final GoogleMapController controller = await _controller.future;
-
     controller.animateCamera(CameraUpdate.newCameraPosition(//ni x pakai since we need origin and destination but this bascially moves the camera to the position
         CameraPosition(
             bearing: 0,
@@ -235,15 +220,6 @@ class _MapPageState extends State<MapPage> {
             tilt: 59.440717697143555,
             zoom: 12)
     ));
-
-    // controller.animateCamera(CameraUpdate.newLatLngBounds(//animation of the camera macam dalam google map bila tekan recenter but in this case dia bukak the map to be more larger
-    //     LatLngBounds(
-    //         southwest: LatLng(boundsSw['lat'],boundsSw['lng']),
-    //         northeast: LatLng(boundsNe['lat'],boundsNe['lng']),
-    //     ),
-    //     25)
-    // );
-
     _setMarker(LatLng(lat, lng));
   }
 
@@ -381,24 +357,6 @@ class _MapPageState extends State<MapPage> {
           ),
         );
 
-    // getIconMarker(String url,String name,LatLng point,String vicinity) async{
-    //   Uint8List bytes = (await NetworkAssetBundle(Uri.parse(url))
-    //       .load(url))
-    //       .buffer
-    //       .asUint8List();
-    //
-    //   _markers.add(//add is a function on class sets
-    //       Marker(//adding the marker object (which are from the google class) to the _marker sets
-    //         markerId: MarkerId(name),
-    //         position: point,
-    //         icon:BitmapDescriptor.fromBytes(bytes),
-    //         infoWindow: InfoWindow(
-    //             title: name,
-    //             snippet: vicinity),
-    //       ),
-    //   );
-    //
-    // }
 
     bool user_ratings_total = false;
     bool opening_hours =false;
@@ -416,31 +374,29 @@ class _MapPageState extends State<MapPage> {
             }else{
               opening_hours=true;
             };
-
             if(nearbyPlaces[index]['user_ratings_total']==null){
               user_ratings_total = false;
             }else{
               user_ratings_total = true;
             };
+
             var location = nearbyPlaces[index]['geometry']['location'];
             LatLng latlng = LatLng(location['lat'], location['lng']);
             print("LATLNG IS: "+latlng.toString());
-            // if(nearbyPlaces[index]['photos'][0]['photo_reference']==null){
-            //   getIconMarker('https://www.northernlightspizza.com/wp-content/uploads/2017/01/image-placeholder.jpg',nearbyPlaces[index]['name'],latlng,nearbyPlaces[index]['vicinity']);
-            // }else{
-            //   getIconMarker(nearbyPlaces[index]['photos'][0]['photo_reference'],nearbyPlaces[index]['name'],latlng,nearbyPlaces[index]['vicinity']);
-            // }
 
-            _markers.add(//add is a function on class sets
-              Marker(//adding the marker object (which are from the google class) to the _marker sets
-                  markerId: MarkerId(nearbyPlaces[index]['name']),
-                  position: latlng,
-                  icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-                  infoWindow: InfoWindow(
-                    title: nearbyPlaces[index]['name'],
-                    snippet: nearbyPlaces[index]['vicinity']),
-              ),
-            );
+            _setMarkerAttractions(nearbyPlaces[index]['name'], nearbyPlaces[index]['vicinity'],nearbyPlaces[index]['photos'][0]['photo_reference'], latlng);
+
+            // _markers.add(//add is a function on class sets
+            //   Marker(//adding the marker object (which are from the google class) to the _marker sets
+            //       markerId: MarkerId(nearbyPlaces[index]['name']),
+            //       position: latlng,
+            //       icon:BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+            //       infoWindow: InfoWindow(
+            //         title: nearbyPlaces[index]['name'],
+            //         snippet: nearbyPlaces[index]['vicinity']),
+            //   ),
+            // );
+            print("Markers are: "+_markers.toString());
             return InkWell(
               child: Container(
                 margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
@@ -509,23 +465,36 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ),
                     Expanded(
-                    child: nearbyPlaces[index]['photos'] != null && nearbyPlaces[index]['photos'].isNotEmpty ? Image.network(
-                      LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']),
-                      fit: BoxFit.cover,
-                      errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                        return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
-                      },
-                    )
-                        : Image.network('https://www.northernlightspizza.com/wp-content/uploads/2017/01/image-placeholder.jpg', fit: BoxFit.cover),
-                      ),
+                      child: nearbyPlaces[index]['photos'] != null && nearbyPlaces[index]['photos'].isNotEmpty ? Image.network(
+                        LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']),
+                        fit: BoxFit.cover,
+                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                          return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+                        },
+                      )
+                          : Image.network('https://www.northernlightspizza.com/wp-content/uploads/2017/01/image-placeholder.jpg', fit: BoxFit.cover),
+                    ),
                   ]
                 ),
               ),
+
               onTap: () async{
-                _markers.clear();
-                _polylines.clear();
                 _getCurrentPosition();
-                var directions = await LocationService().getDirections((_currentPosition?.latitude).toString()+","+(_currentPosition?.longitude).toString(), nearbyPlaces[1]['geometry']['location']['lat'].toString()+","+nearbyPlaces[1]['geometry']['location']['lng'].toString());
+                //setState((){
+                  _polylines.clear();
+                  //_markers.clear();// COMMENT THIS OUT KALAU NAK TUNJUK ALL THE OTHER MARKERS.. I uncomment CAUSE I CANT MANAGE TO LET THE THING PRINT OUT THE WHOLE LIST INSTEAD OF JUST A FEW WHEN PRESSING DIFFERENT LEVELS
+                  // _markers.add(//add is a function on class sets
+                  //   Marker(//adding the marker object (which are from the google class) to the _marker sets
+                  //     markerId:  MarkerId(nearbyPlaces[index]['name']),
+                  //     position: latlng,
+                  //     icon://BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                  //     await MarkerIcon.downloadResizePictureCircle(LocationService().getPhoto(nearbyPlaces[index]['photos'][0]['photo_reference']), size: 150, addBorder: true, borderColor: Colors.white, borderSize: 15),
+                  //     infoWindow: InfoWindow(title: nearbyPlaces[index]['name'], snippet: nearbyPlaces[index]['vicinity']),
+                  //   ),
+                  // );
+                //});
+
+                var directions = await LocationService().getDirections((_currentPosition?.latitude).toString()+","+(_currentPosition?.longitude).toString(), nearbyPlaces[index]['geometry']['location']['lat'].toString()+","+nearbyPlaces[index]['geometry']['location']['lng'].toString());
                 _goToThePlaceIcon(directions['start_location']['lat'],directions['start_location']['lng']);
                 _setPolyline(directions['polyline_decoded']);
               },
