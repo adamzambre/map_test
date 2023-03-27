@@ -1,6 +1,8 @@
 import 'dart:ffi';
 
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
@@ -8,6 +10,13 @@ import 'dart:convert' as convert;
 
 class LocationService{//gets data of the place from the json
   final String key = 'AIzaSyDhvydgqumkaJiN17EQ6eHEiHH4nipmWPo';
+
+  Future<String?> getCurrentPosition()async{
+    Position position = await Geolocator.getCurrentPosition();
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    String? city = placemarks[0].locality;
+    return city;
+  }
 
   Future<String> getPlaceId(String input) async{//getting the place id for the other uses in the api urls
 
@@ -67,13 +76,9 @@ class LocationService{//gets data of the place from the json
     return results;
   }
 
-  Future<List<dynamic>> getNearbyPlaces(double latitude, double longitude,Map<String,List<String>> type) async{//get the url to get data from nearby place
+  Future<List<dynamic>> getNearbyPlaces(double latitude, double longitude,String type) async{//get the url to get data from nearby place
     int radius = 50000;
-    String joinedTypes = type.values.join(",");
-    String myString = joinedTypes.replaceAll(RegExp(r'[\[\]\s]+'), '');
-    print("joinedTypes: "+myString);
-
-    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude%2C$longitude&radius=$radius&key=$key&type=$myString';
+    final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude%2C$longitude&radius=$radius&key=$key&type=$type';
     print("url: "+url);
 
     var response = await http.get(Uri.parse(url));
