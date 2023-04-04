@@ -150,6 +150,7 @@ class _LoginState extends State<Login> {
                         }
                       }
                     }else if(LocalTourGuide==true){
+
                       ///////////////////////////////start dari sini nak sign in local tour guide secara sendiri
                       if(!newUser){//user log in
                         print("local is logging in ");

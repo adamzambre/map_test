@@ -69,7 +69,7 @@ class _editInfoPersonnelState extends State<EditInfoPersonnel> {
           } else if (sexFB == "female") {
             sex = "female";
           } else {
-            sex = null;
+            sex = "";
           }
 
           return SingleChildScrollView(
@@ -166,34 +166,40 @@ class _editInfoPersonnelState extends State<EditInfoPersonnel> {
                                 padding:  EdgeInsets.fromLTRB(10,8,10,10),
                                 child: Text("Sex",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
                               ),
-                              Container(
-                                alignment: Alignment.topLeft,
-                                padding:  EdgeInsets.symmetric(horizontal: 10),
-                                child:  Column(
-                                    children: <Widget>[
-                                      RadioListTile(
-                                        title: Text("Male"),
-                                        value: "male",
-                                        groupValue: sex,
-                                        onChanged: (value){
-                                          setState(() {
-                                            sex = value.toString();
-                                          });
-                                        },
-                                      ),
+                              StatefulBuilder(
+                                builder:(BuildContext context, StateSetter setState){
+                                  return Container(
+                                      alignment: Alignment.topLeft,
+                                      padding:  EdgeInsets.symmetric(horizontal: 10),
+                                      child:  Column(
+                                          children: <Widget>[
+                                            RadioListTile(
+                                              title: Text("Male"),
+                                              value: "male",
+                                              groupValue: sex,
+                                              onChanged: (value){
+                                                setState(() {
+                                                  sex = value.toString();
+                                                });
+                                                print("SEX:"+sex.toString());
+                                              },
+                                            ),
 
-                                      RadioListTile(
-                                        title: Text("Female"),
-                                        value: "female",
-                                        groupValue: sex,
-                                        onChanged: (value){
-                                          setState(() {
-                                            sex = value.toString();
-                                          });
-                                        },
-                                      ),
-                                  ]
-                                )
+                                            RadioListTile(
+                                              title: Text("Female"),
+                                              value: "female",
+                                              groupValue: sex,
+                                              onChanged: (value){
+                                                setState(() {
+                                                  sex = value.toString();
+                                                });
+                                                print("SEX:"+sex.toString());
+                                              },
+                                            ),
+                                          ]
+                                      )
+                                  );
+                                }
                               )
                             ]
                         ),
@@ -203,26 +209,31 @@ class _editInfoPersonnelState extends State<EditInfoPersonnel> {
                           padding:  EdgeInsets.fromLTRB(10,8,10,10),
                           child: Text("Place of origin",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
                         ),
-                        CSCPicker(
-                          countryDropdownLabel: countryFB=="" ? "country":countryFB,
-                          stateDropdownLabel: stateFB=="" ? "state":stateFB,
-                          cityDropdownLabel: cityFB=="" ? "city":cityFB,
+                        StatefulBuilder(
+                          builder:(BuildContext context, StateSetter setState){
+                            return CSCPicker(
+                              countryDropdownLabel: countryFB=="" ? "country":countryFB,
+                              stateDropdownLabel: stateFB=="" ? "state":stateFB,
+                              cityDropdownLabel: cityFB=="" ? "city":cityFB,
 
-                          onCountryChanged: (value) {
-                            setState(() {
-                              countryValue = value;
-                            });
-                          },
-                          onStateChanged:(value) {
-                            setState(() {
-                              stateValue = value;
-                            });
-                          },
-                          onCityChanged:(value) {
-                            setState(() {
-                              cityValue = value;
-                            });
-                          },
+                              onCountryChanged: (value) {
+                                setState(() {
+                                  countryValue = value;
+                                });
+                              },
+                              onStateChanged:(value) {
+                                setState(() {
+                                  stateValue = value;
+                                });
+                              },
+                              onCityChanged:(value) {
+                                setState(() {
+                                  cityValue = value;
+                                });
+                              },
+                            );
+                          }
+
                         ),
                         SizedBox(height:25),
                         Container(
