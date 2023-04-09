@@ -1,5 +1,7 @@
 import 'package:map_test/Constants/Constants.dart';
 import 'package:map_test/Routes/AddProperty.dart';
+import 'package:map_test/Routes/localRecommendation.dart';
+import 'package:map_test/Routes/local_tour_guides/MyRecommendations.dart';
 import 'package:map_test/Routes/local_tour_guides/ProfileLTG.dart';
 import 'package:map_test/Routes/local_tour_guides/MessagesLTG.dart';
 import 'package:map_test/Routes/Properties.dart';
@@ -31,7 +33,7 @@ void main() => runApp(
 
 class HomePageLTGState extends State<HomePageLTG> {
   int _currentTab=0;
-  List<Widget> _children=[Messages(),ProfileLTG()];
+  List<Widget> _children=[Messages(),MyRecommendations(),ProfileLTG()];
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,14 @@ class HomePageLTGState extends State<HomePageLTG> {
               size: 30,
             ),
             label: "MESSAGES",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.assignment,
+
+              size: 30,
+            ),
+            label: "My Recommendations",
           ),
           BottomNavigationBarItem(
             icon: Icon(

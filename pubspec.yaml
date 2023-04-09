@@ -84,6 +84,9 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   custom_marker: ^1.0.0
   dropdown_button2: ^2.0.0
+  textfield_tags: ^2.0.2
+  google_fonts: ^4.0.3
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

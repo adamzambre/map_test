@@ -78,15 +78,14 @@ class _ProfileState extends State<Profile> {
                       ),
                     ),
                     SizedBox(width: 15,),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                      Text(nameFB,style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.black87
-                      ),),
-                      ],
+                    Flexible(
+                      child: Container(
+                        child: Text(nameFB,style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            color: Colors.black87
+                        ),),
+                      ),
                     )
                 ],
                 ),

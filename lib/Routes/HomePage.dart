@@ -6,6 +6,7 @@ import 'package:map_test/Routes/Properties.dart';
 import 'package:map_test/Routes/MapPage.dart';
 import 'package:map_test/Routes/homeScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:map_test/Routes/localRecommendation.dart';
 //import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 //import '../Widgets/TypeProperties.dart';
@@ -30,7 +31,7 @@ void main() => runApp(
 
 class HomePageState extends State<HomePage> {
   int _currentTab=0;
-  List<Widget> _children=[HomeScreen(),MapPage(),Messages(),Profile()];
+  List<Widget> _children=[HomeScreen(),MapPage(),LocalRecommendation(),Messages(),Profile()];
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +66,14 @@ class HomePageState extends State<HomePage> {
                 size: 30,
               ),
               label: "MAP",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.assignment,
+
+                size: 30,
+              ),
+              label: "Trips",
             ),
             BottomNavigationBarItem(
               icon: Icon(
