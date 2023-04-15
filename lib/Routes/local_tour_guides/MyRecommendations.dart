@@ -10,6 +10,8 @@ import 'package:map_test/Routes/chat.dart';
 import 'package:map_test/Routes/local_tour_guides/TripCreator.dart';
 import 'package:map_test/Services/user_info.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:readmore/readmore.dart';
+import 'EditTrip.dart';
 
 void main()=>runApp(
     MaterialApp(
@@ -42,22 +44,22 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                 flex:1,
                 child: Container(
                     alignment: Alignment.topCenter,
-                    child: Text("Provide local insights to your tourists!",
+                    child: Text("Provide local insights to your tourists!!!",
                       style:TextStyle(
                           fontSize:20,
                           fontWeight: FontWeight.w700),
                     )
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Expanded(
-                  flex:10,
+                  flex:20,
                   child: StreamBuilder(
                       stream: FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).collection("Trips").snapshots(),
                       builder:(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-                        print(FirebaseAuth.instance.currentUser!.uid);
                         print(snapshot.data?.docs.toString());
 
+                        // QueryDocumentSnapshot document = snapshot.data!.docs;
 
                         if(snapshot.hasError){
                           return Center(
@@ -77,44 +79,37 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                             child: ListView(
                               scrollDirection: Axis.vertical,
                               children: snapshot.data!.docs.map((document){
-                                print("replyer document:"+document.toString());
-                                return Container(
-                                    child: FutureBuilder<QuerySnapshot>(
-                                        future:FirebaseFirestore.instance.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).collection('Trips').get(),
-                                        builder:(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-                                          if (snapshot.hasError) {
-                                            return Center(
-                                              child: Text('Error: ${snapshot.error}'),
-                                            );
-                                          }
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return Center(
-                                              child: CircularProgressIndicator(),
-                                            );
-                                          }
-                                          QueryDocumentSnapshot document = snapshot.data!.docs.first;
-                                          var data = document.data()! as Map<String, dynamic>;//BENDA NI YG BAGI ERROR "data!.data()"
-                                          print("DATA: "+data.toString());
-                                          String title = data["name"];
-                                          List<dynamic> picUris = data["picUri"];
-                                          List<String> picUrisCasted = picUris.cast<String>().toList();//The cast() method converts the List<dynamic> to a List<String> by applying a type cast to each element of the list.
-                                          List<dynamic> tags = data["tags"];
-                                          List<String> tagsCasted = tags.cast<String>().toList();
-                                          String about = data["description"];
+                                var data = document.data()! as Map<String, dynamic>;//BENDA NI YG BAGI ERROR "data!.data()"
+                                print("DATA: "+data.toString());
+                                String title = data["name"];
+                                List<dynamic> picUris = data["picUri"];
+                                List<String> picUrisCasted = picUris.cast<String>().toList();//The cast() method converts the List<dynamic> to a List<String> by applying a type cast to each element of the list.
+                                List<dynamic> tags = data["tags"];
+                                List<String> tagsCasted = tags.cast<String>().toList();
+                                String about = data["description"];
 
-                                          int index = 0;
-                                          return Container(
-                                            margin:EdgeInsets.all(10),
-                                            width:MediaQuery.of(context).size.width,
-                                            height:MediaQuery.of(context).size.height *0.3,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            child:Column(
-                                              children: [
-                                                Expanded(
-                                                    flex:4,
-                                                    child: Stack(
+                                int index = 0;
+                                print("replyer document:"+document.toString());
+                                return InkWell(
+                                  onTap:(){
+                                  Navigator.push(
+                                    context, MaterialPageRoute(
+                                      builder: (context) => EditTrip(document:document)
+                                  ),
+                                  );
+                                },
+                                  child: Container(
+                                          margin:EdgeInsets.all(10),
+                                          width:MediaQuery.of(context).size.width,
+                                          height:MediaQuery.of(context).size.height *0.3,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child:Column(
+                                            children: [
+                                              Expanded(
+                                                  flex:5,
+                                                  child: Stack(
                                                       children:[
                                                         Container(
                                                           width:MediaQuery.of(context).size.width,
@@ -125,7 +120,7 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                                               topRight: Radius.circular(20.0),
                                                             ),
                                                           ),
-                                                          child: ClipRRect(/////////////////sini
+                                                          child: ClipRRect(
                                                             borderRadius: BorderRadius.only(
                                                               topLeft: Radius.circular(20.0),
                                                               topRight: Radius.circular(20.0),
@@ -142,25 +137,12 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                                                 ],
                                                               ).createShader(bounds),
                                                               blendMode: BlendMode.srcATop,
-                                                              child: CarouselSlider(
-                                                                options: CarouselOptions(
-                                                                    height: MediaQuery.of(context).size.height *0.3,
-                                                                    viewportFraction: 1.0,
-                                                                    enlargeCenterPage: false,
-                                                                    autoPlay: true),
-                                                                items: picUrisCasted.map((i) {
-                                                                  return Builder(
-                                                                    builder: (BuildContext context) {
-                                                                      return Image.network(
-                                                                          i,
-                                                                          fit: BoxFit.cover,
-                                                                      );
-                                                                    }
-                                                                  );
-                                                                }).toList(),
+                                                              child: Image.network(
+                                                                picUrisCasted[0],
+                                                                fit: BoxFit.cover,
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
                                                         ),
                                                         Align(
                                                           alignment: Alignment.bottomLeft,
@@ -169,43 +151,89 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                                             child: Container(
                                                               decoration: BoxDecoration(
                                                                 borderRadius: BorderRadius.circular(20),
+                                                                color: Colors.blue,
                                                               ),
                                                               child: Text(
-                                                                  title,
-                                                                  style:GoogleFonts.lato(
-                                                                    textStyle: TextStyle(
-                                                                      color: Colors.white,
-                                                                      fontWeight: FontWeight.bold,
-                                                                      fontSize: 15,
-                                                                    ),
-                                                                  )
+                                                                title,
+                                                                style: GoogleFonts.lato(
+                                                                  textStyle: TextStyle(
+                                                                    color: Colors.white,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    fontSize: 20,
+                                                                  ),
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
-                                                        )
+                                                        ),
                                                       ]
-                                                    )
-                                                ),
-                                                Expanded(
-                                                  flex:1,
-                                                  child: Container(
-                                                      width:MediaQuery.of(context).size.width,
-                                                      height:MediaQuery.of(context).size.height *0.3,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:BorderRadius.only(
-                                                        bottomLeft: Radius.circular(20.0),
-                                                        bottomRight: Radius.circular(20.0),
-                                                      ),
-                                                      color: Colors.grey,
-                                                    ),
-                                                    child: Text("test")
                                                   )
-                                                ),
-                                              ],
-                                            )
-                                          );
-                                        }
-                                    )
+                                              ),
+                                              Expanded(
+                                                flex:5,
+                                                child: Container(
+                                                  padding:EdgeInsets.all(10),
+                                                  width:MediaQuery.of(context).size.width,
+                                                  height:MediaQuery.of(context).size.height *0.3,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:BorderRadius.only(
+                                                      bottomLeft: Radius.circular(20.0),
+                                                      bottomRight: Radius.circular(20.0),
+                                                    ),
+                                                    color: Colors.grey,
+                                                  ),
+                                                  child: Column(
+                                                      children: [
+                                                        SingleChildScrollView(
+                                                            scrollDirection: Axis.horizontal,
+                                                            child: Row(
+                                                                children: tagsCasted.map((String tag) {
+                                                                  return Container(
+                                                                    decoration: const BoxDecoration(
+                                                                      borderRadius: BorderRadius.all(
+                                                                        Radius.circular(20.0),
+                                                                      ),
+                                                                      color: Color.fromARGB(255, 74, 137, 92),
+                                                                    ),
+                                                                    margin: const EdgeInsets.symmetric(
+                                                                        horizontal: 5.0),
+                                                                    padding: const EdgeInsets.symmetric(
+                                                                        horizontal: 10.0, vertical: 5.0),
+                                                                    child: Text(
+                                                                      '#$tag',
+                                                                      style: const TextStyle(
+                                                                          color: Colors.white),
+                                                                    ),
+                                                                  );
+                                                                }).toList()),
+                                                          ),
+                                                        Expanded(
+                                                          child: SingleChildScrollView(
+                                                            scrollDirection: Axis.vertical,
+                                                              child: Container(
+                                                                margin: const EdgeInsets.symmetric(
+                                                                    horizontal: 5.0),
+                                                                padding: const EdgeInsets.symmetric(
+                                                                    horizontal: 10.0, vertical: 5.0),
+                                                                child:ReadMoreText(
+                                                                    about,
+                                                                  trimLines: 3,
+                                                                  colorClickableText: Colors.pink,
+                                                                  trimMode: TrimMode.Line,
+                                                                  trimCollapsedText: 'Show more',
+                                                                  trimExpandedText: 'Show less',
+                                                                  moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                )
+                                              ),
+                                            ],
+                                          )
+                                        ),
                                 );
                               }).toList(),
                             ),

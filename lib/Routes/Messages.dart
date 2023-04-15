@@ -80,6 +80,7 @@ class _MessagesState extends State<Messages> {
                                       child: CircularProgressIndicator(),
                                     );
                                   }
+
                                   QueryDocumentSnapshot document = snapshot.data!.docs.first;
                                   var data = document.data() as Map<String, dynamic>;//BENDA NI YG BAGI ERROR "data!.data()"
                                   String nameFB = data["name"]!="" ? data['name'] : 'please insert name';
