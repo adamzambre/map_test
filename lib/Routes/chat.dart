@@ -31,6 +31,7 @@ class _ChatState extends State<Chat> {
         // user has scrolled to the bottom, mark messages as read
       }
     });
+    chatCollectionExistOrNot();
   }
 
   @override
@@ -39,7 +40,116 @@ class _ChatState extends State<Chat> {
     super.dispose();
   }
 
+  void chatCollectionExistOrNot()async{
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    DocumentReference chatDocumentRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(uid)
+        .collection('chat')
+        .doc(widget.document.id);
+
+    DocumentSnapshot chatSnapshot = await chatDocumentRef.get();
+    if (chatSnapshot.exists) {
+      // Call the lastMessageSeen function to update the lastMessageSeen field
+      seen();
+      lastMessageSeen();
+    } else {
+      print("Chat document does not exist");
+    }
+  }
+  void seen() async {
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      DocumentReference documentReference1 = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(uid)
+          .collection('chat')
+          .doc(widget.document.id);
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(documentReference1);
+        documentReference1.update({"seen": true});
+        print("success");
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  void lastMessageSeen() async {
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      CollectionReference messagesCollection = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(uid)
+          .collection('chat')
+          .doc(widget.document.id)
+          .collection('messages');
+
+      QuerySnapshot querySnapshot = await messagesCollection
+          .orderBy('timeStamp', descending: true) // Replace 'timestamp' with the actual field you want to sort by
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // If there is at least one document in the collection
+        DocumentSnapshot lastDocument = querySnapshot.docs.first;
+        // Access the data from lastDocument and update the 'lastMessageSeen' field
+        String content = lastDocument['content'];
+        DocumentReference chatDocument = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(uid)
+            .collection('chat')
+            .doc(widget.document.id);
+        await chatDocument.update({'LastMessageSeen': content});
+        print("success");
+      } else {
+        print("No documents found");
+      };
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<String> getUserType() async{
+    try{
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(uid)
+          .get();
+      if (docSnapshot.exists) {
+        String userType = docSnapshot.get('userType'); // Access the 'userType' field from the document's snapshot
+        return userType;
+      } else {
+        print('Document does not exist');
+        return ''; // Return a default value or handle the case when the document does not exist
+      }
+    }catch(e){
+      print(e.toString());
+      return '';
+    }
+  }
+
+  void sendMessage() async{
+    try{
+      String userType = await getUserType();
+
+      if(userType=='tourist'){
+
+      }
+      if(userType=='local tour guide'){
+
+      }if(userType=='admin'){
+
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
+
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -198,12 +308,13 @@ class _ChatState extends State<Chat> {
                             child: Container(
                                 child:IconButton(
                                     onPressed:(){
+                                      String date = DateTime.now().toString();
                                       String message = _messageController.text.replaceAll(RegExp(r'\s+'), ' ').trim(); // Remove leading/trailing whitespace
                                       if (message.isEmpty) {
                                         return; // Do not send empty message
                                       }else{
-                                        messagingService().addMessageTourist(widget.document.get('uid'),_messageController.text);
-                                        messagingService().addMessageLocal(widget.document.get('uid'),_messageController.text);
+                                        messagingService().addMessageTourist(widget.document.get('uid'),_messageController.text,date);
+                                        messagingService().addMessageLocal(widget.document.get('uid'),_messageController.text,date);
                                         _messageController.clear();
                                         print("message sents");
                                       }

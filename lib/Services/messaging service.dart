@@ -13,9 +13,8 @@ import 'package:map_test/Services/authententication.dart';
 
 class messagingService{
 
-  Future<bool> addMessageTourist(String uidLocal,String content) async{
+  Future<bool> addMessageTourist(String uidLocal,String content,String date) async{
     try {
-      String date = DateTime.now().toString();
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference1 = FirebaseFirestore.instance
           .collection('Users')
@@ -25,7 +24,7 @@ class messagingService{
       FirebaseFirestore.instance.runTransaction((transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference1);
-        documentReference1.set({"placeHolder": ""});
+        documentReference1.set({"LastMessage": "","LastMessageSeen": "","seen": true});
         print("success1");
       });
 
@@ -40,6 +39,7 @@ class messagingService{
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference2);
         documentReference2.set({"from": uid,"to": uidLocal, "content": content,"timeStamp":date});
+        documentReference1.update({"LastMessage": content});
         print("success2");
       });
       return true;
@@ -49,20 +49,19 @@ class messagingService{
     }
   }
 
-  Future<bool> addMessageLocal(String uidLocal,String content) async{
+  Future<bool> addMessageLocal(String uidLocal,String content,String date) async{
     try {
-      String date = DateTime.now().toString();
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentReference documentReference1 = FirebaseFirestore.instance
           .collection('Users')
-          .doc(uidLocal)
+          .doc(uid-Local)
           .collection('chat')
           .doc(uid);
 
       FirebaseFirestore.instance.runTransaction((transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference1);
-        documentReference1.set({"placeHolder": ""});
+        documentReference1.set({"LastMessage": "","LastMessageSeen": "","seen": true});
         print("success");
       });
 
@@ -78,6 +77,7 @@ class messagingService{
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference2);
         documentReference2.set({"from": uid,"to": uidLocal, "content": content,"timeStamp":date});
+        documentReference1.update({"LastMessage": content});
         print("success");
       });
       return true;

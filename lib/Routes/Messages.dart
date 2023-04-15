@@ -62,13 +62,15 @@ class _MessagesState extends State<Messages> {
                     }
 
                     return Container(
+                      width:MediaQuery.of(context).size.width,
+                      height:MediaQuery.of(context).size.height,
                       child: ListView(
                         scrollDirection: Axis.vertical,
-                        children: snapshot.data!.docs.map((document){
-                          print("replyer document:"+document.toString());
+                        children: snapshot.data!.docs.map((documentReplyer){
+                          print("replyer document:"+documentReplyer.toString());
                           return Container(
                             child: FutureBuilder<QuerySnapshot>(
-                                future:FirebaseFirestore.instance.collection('Users').where('uid', isEqualTo: document.id).get(),
+                                future:FirebaseFirestore.instance.collection('Users').where('uid', isEqualTo: documentReplyer.id).get(),
                                 builder:(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
                                   if (snapshot.hasError) {
                                     return Center(
@@ -93,21 +95,65 @@ class _MessagesState extends State<Messages> {
                                           child: Container(
                                             margin: EdgeInsets.symmetric(vertical: 15,horizontal: 10),
                                             child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.start,
                                               children: <Widget>[
-                                                Container(
-                                                  margin: EdgeInsets.only(right: 10),
-                                                  height: 60,
-                                                  width: 60,
-                                                  decoration: BoxDecoration(
-                                                      shape: BoxShape.rectangle,
-                                                      image:DecorationImage(
-                                                        image:NetworkImage(picUri),
-                                                      )
+                                                Expanded(
+                                                  flex:2,
+                                                  child: Container(
+                                                    margin: EdgeInsets.only(right: 10),
+                                                    height: 60,
+                                                    width: 60,
+                                                    child:CircleAvatar(
+                                                        radius:15,
+                                                        backgroundImage: NetworkImage(
+                                                          picUri,
+                                                        )
+                                                    ),
                                                   ),
                                                 ),
-                                                Container(
-                                                    child: Text(nameFB,style: TextStyle(fontSize:12),maxLines: 2,overflow: TextOverflow.ellipsis,)
+                                                Expanded(
+                                                  flex: 8,
+                                                  child: Container(
+                                                    alignment: Alignment.centerLeft,
+                                                    child: Column(
+                                                        children:[
+                                                          Text(nameFB,style: TextStyle(fontSize:12),maxLines: 2,overflow: TextOverflow.ellipsis,),
+                                                          SizedBox(height:10),
+                                                          Container(
+                                                            child: StreamBuilder(
+                                                                stream:FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).collection("chat").doc(documentReplyer.id).snapshots(),
+                                                                builder:(BuildContext context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+                                                                  print("LISTENING TO STREAM");
+                                                                  if (snapshot.hasError) {
+                                                                    return Center(
+                                                                      child: Text('Error: ${snapshot.error}'),
+                                                                    );
+                                                                  }
+                                                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                                                    return Center(
+                                                                      child: CircularProgressIndicator(),
+                                                                    );
+                                                                  }
+                                                                  if (!snapshot.hasData || !snapshot.data!.exists) {
+                                                                    // Chat collection does not exist yet, return an empty container or a placeholder widget
+                                                                    return SizedBox(height: 0);
+                                                                  }
+                                                                  if(snapshot.hasData || snapshot.data!.exists){
+                                                                    var replyerDoc = snapshot.data!.data(); // Access the data from DocumentSnapshot
+                                                                    var LastMessage = replyerDoc!['LastMessage'];
+                                                                    return Text(LastMessage,style: TextStyle(fontSize:10),maxLines: 2,overflow: TextOverflow.ellipsis,);
+
+                                                                  }
+                                                                  return SizedBox(height: 0);
+                                                                }
+                                                            ),
+                                                          ),
+                                                        ]
+                                                    ),
+                                                  )
                                                 ),
+
+
 
                                               ],
                                             ),
