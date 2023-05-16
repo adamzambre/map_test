@@ -88,6 +88,7 @@ dependencies:
   google_fonts: ^4.0.3
   carousel_slider: ^4.2.1
   readmore: ^2.2.0
+  fluttertoast: ^8.2.1
 
 dev_dependencies:
   flutter_test:

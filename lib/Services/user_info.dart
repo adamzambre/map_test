@@ -121,22 +121,22 @@ class UserInfos {
     }
   }
 
-  Future<bool?> addReview(QueryDocumentSnapshot<Object?> document,
-      String comment) async {
+  Future<bool?> addReview(QueryDocumentSnapshot<Object?> document, String comment,double rating) async {
     final now = new DateTime.now();
+    String dateUid = DateTime.now().toString();
     String formatter = DateFormat('yMd').format(now);
     String uid = FirebaseAuth.instance.currentUser!.uid;
     var Name = await FirebaseFirestore.instance.collection('Users')
         .doc(uid)
         .get()
         .then((value) {
-      return value.data()?['Name']; // Access your after your get the data
+      return value.data()?['name']; // Access your after your get the data
     });
     String PPUrl = await FirebaseFirestore.instance.collection('Users')
         .doc(uid)
         .get()
         .then((value) {
-      return value.data()?['PPUrl']; // Access your after your get the data
+      return value.data()?['picUri']; // Access your after your get the data
     });
 
     try {
@@ -144,7 +144,7 @@ class UserInfos {
           .collection('Users')
           .doc(document.id)
           .collection('UserReviews')
-          .doc(uid);
+          .doc(dateUid);
       FirebaseFirestore.instance.runTransaction((
           transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
@@ -152,10 +152,12 @@ class UserInfos {
         if (!snapshot
             .exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
           documentReference.set({
-            "Name": Name,
-            "PPUrl": PPUrl,
-            "Comment": comment,
-            "Date": formatter
+            "rating":rating,
+            "uid":uid,
+            "name": Name,
+            "picUri": PPUrl,
+            "comment": comment,
+            "date": formatter
           });
           return true;
         }
@@ -164,6 +166,92 @@ class UserInfos {
       print(e.toString());
       return false;
     }
+  }
+
+  Future<Map<String, dynamic>> getRatingAverage(QueryDocumentSnapshot<Object?> document) async{
+    int totalDocuments = 0;
+    double totalRating = 0;
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(document.id).collection('UserReviews').get();
+    final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
+    totalDocuments = documents.length;
+    print("TOTAL DOCUMENTS: "+totalDocuments.toString());
+    totalRating = 0;
+    for (var doc in documents) {
+      final rating = doc['rating'] as double;
+      totalRating += rating;
+    }
+    double averageRating = totalRating / (5 * totalDocuments);
+
+    return {'averageRating': averageRating, 'totalDocuments': totalDocuments};
+  }
+
+  Future<bool?> addReviewTrip(QueryDocumentSnapshot<Object?> documentTrip,QueryDocumentSnapshot<Object?> documentLTG, String comment,double rating) async {
+    final now = new DateTime.now();
+    String dateUid = DateTime.now().toString();
+    String formatter = DateFormat('yMd').format(now);
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    var Name = await FirebaseFirestore.instance.collection('Users')
+        .doc(uid)
+        .get()
+        .then((value) {
+      return value.data()?['name']; // Access your after your get the data
+    });
+    String PPUrl = await FirebaseFirestore.instance.collection('Users')
+        .doc(uid)
+        .get()
+        .then((value) {
+      return value.data()?['picUri']; // Access your after your get the data
+    });
+
+    try {
+      DocumentReference documentReference = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(documentLTG.id)
+          .collection('Trips')
+          .doc(documentTrip.id)
+          .collection('TripReviews')
+          .doc(dateUid);
+      FirebaseFirestore.instance.runTransaction((
+          transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
+        //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
+        DocumentSnapshot snapshot = await transaction.get(documentReference);
+        if (!snapshot
+            .exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
+          documentReference.set({
+            "rating":rating,
+            "uid":uid,
+            "name": Name,
+            "picUri": PPUrl,
+            "comment": comment,
+            "date": formatter
+          });
+          return true;
+        }
+      });
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> getRatingAverageTrip(QueryDocumentSnapshot<Object?> documentTrip,QueryDocumentSnapshot<Object?> documentLTG) async{
+    int totalDocuments = 0;
+    double totalRating = 0;
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(documentLTG.id).collection('Trips')
+        .doc(documentTrip.id)
+        .collection('TripReviews')
+        .get();
+    final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
+    totalDocuments = documents.length;
+    print("TOTAL DOCUMENTS: "+totalDocuments.toString());
+    totalRating = 0;
+    for (var doc in documents) {
+      final rating = doc['rating'] as double;
+      totalRating += rating;
+    }
+    double averageRating = totalRating / (5 * totalDocuments);
+
+    return {'averageRating': averageRating, 'totalDocuments': totalDocuments};
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -22,7 +22,11 @@ class _ChatState extends State<Chat> {
 
   @override
 
+  bool onPage=false;
   void initState() {
+    onPage =true;
+
+    print(onPage.toString());
     super.initState();
 
     _scrollController.addListener(() {
@@ -57,11 +61,16 @@ class _ChatState extends State<Chat> {
                   color: Constants.greenAirbnb,
                   child:Row(
                     children: [
-                      Container(
+                      WillPopScope(
+                      onWillPop: () async {
+                        onPage = false; // Update onPage value to false when user presses back button
+                        return true;
+                        },
                         child: IconButton(
                           icon: Icon(Icons.arrow_back,color: Colors.black87,size: 20,),
                           onPressed: (){
                               Navigator.pop(context);
+                              print(onPage.toString());
                           },
                         ),
                       ),
@@ -202,8 +211,9 @@ class _ChatState extends State<Chat> {
                                       if (message.isEmpty) {
                                         return; // Do not send empty message
                                       }else{
-                                        messagingService().addMessageTourist(widget.document.get('uid'),_messageController.text);
-                                        messagingService().addMessageLocal(widget.document.get('uid'),_messageController.text);
+                                        String date = DateTime.now().toString();
+                                        messagingService().addMessage(widget.document.get('uid'),_messageController.text,date);
+                                        // messagingService().addMessageLocal(widget.document.get('uid'),_messageController.text,date);
                                         _messageController.clear();
                                         print("message sents");
                                       }

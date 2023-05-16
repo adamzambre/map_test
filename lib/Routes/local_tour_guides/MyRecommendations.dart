@@ -151,7 +151,6 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                                             child: Container(
                                                               decoration: BoxDecoration(
                                                                 borderRadius: BorderRadius.circular(20),
-                                                                color: Colors.blue,
                                                               ),
                                                               child: Text(
                                                                 title,
