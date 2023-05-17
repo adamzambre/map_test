@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:map_test/Routes/EditInfoPersonnel.dart';
 import 'package:map_test/Services/user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -74,6 +75,29 @@ class _infoPersonnelLTGState extends State<InfoPersonnelLTG> {
                         )
                     ),
                     SizedBox(height:25),
+                    /*Row(
+                        children:[
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                            child: Text("Rating:",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                          ),
+                          Container(
+                            child:FutureBuilder<Map<String,dynamic>>(
+                                future:UserInfos().getRatingAverage(FirebaseAuth.instance.currentUser!.uid),
+                                builder:(context, snapshot){
+                                  final averageRating = snapshot.data?['averageRating'];
+                                  final totalDocuments = snapshot.data?['totalDocuments'];
+                                  if(averageRating.isNaN){
+                                    return Text("0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                  }else{
+                                    return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                  }
+                                }
+                            ),
+                          ),
+                        ]
+                    ),*/
                     Column(
                       children:[
                         Container(
@@ -172,7 +196,88 @@ class _infoPersonnelLTGState extends State<InfoPersonnelLTG> {
                             );
                           },
                         )
-                    )
+                    ),
+                    SizedBox(height:10),
+                    Container(
+                      child:FutureBuilder<Map<String,dynamic>>(
+                          future:UserInfos().getRatingAverage(FirebaseAuth.instance.currentUser!.uid),
+                          builder:(context, snapshot){
+                            final averageRating = snapshot.data?['averageRating'];
+                            final totalDocuments = snapshot.data?['totalDocuments'];
+                            if(averageRating ==0.0){
+                              return Text("Rating: 0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                            }else{
+                              return Text("Rating:"+averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                            }
+                          }
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: StreamBuilder(
+                          stream: FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).collection("UserReviews").snapshots(),
+                          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            }
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (snapshot.data!.size == 0) { //kalau data takde
+                              return Container(
+                                alignment: Alignment.center,
+                                padding:  EdgeInsets.all(10),
+                                child: Text("No comments have been left for you yet",style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.normal, fontStyle: FontStyle.normal)),
+                              );
+                            }
+                            return ListView(
+                              shrinkWrap: true,//kalau buang ni listtile tak keluar
+                              children: snapshot.data!.docs.map((document){
+                                return ListTile(
+                                  tileColor: Colors.white,
+                                  leading:Container(
+                                    child: CircleAvatar(
+                                      radius:50,
+                                      backgroundImage: NetworkImage(document.get("picUri")),
+                                    ),
+                                  ),
+                                  title: Column(
+                                    children: [
+                                      Text(document.get("name")),
+                                      Container(
+                                        child: RatingBar.builder(
+                                          initialRating: document.get("rating"),
+                                          direction: Axis.horizontal,
+                                          allowHalfRating: true,
+                                          itemCount: 5,
+                                          itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                          itemBuilder: (context, _) => Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          onRatingUpdate: (rating) {
+                                            print(rating);
+                                            setState(() {});
+                                          },
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  subtitle: Text(
+                                      '${document.get("comment")}'
+                                          '\n\n${document.get("date")}'
+                                  ),
+                                  isThreeLine: true,
+                                );
+                              }
+                              ).toList(),
+                            );
+                          }
+                      ),
+                    ),
                   ],
                 )
             );

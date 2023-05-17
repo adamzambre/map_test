@@ -6,8 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:map_test/Services/user_info.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class EditTrip extends StatefulWidget {
@@ -388,6 +390,97 @@ class _EditTripState extends State<EditTrip> {
                                 )
                               ]
                       )
+                      ),
+                      SizedBox(height:25),
+                      Row(
+                          children:[
+                            Container(
+                              alignment: Alignment.topLeft,
+                              padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                              child: Text("Rating:",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                            ),
+                            Container(
+                              child:FutureBuilder<Map<String,dynamic>>(
+                                  future:UserInfos().getRatingAverageTrip(widget.document,FirebaseAuth.instance.currentUser!.uid),
+                                  builder:(context, snapshot){
+                                    final averageRating = snapshot.data?['averageRating'];
+                                    final totalDocuments = snapshot.data?['totalDocuments'];
+                                    if(averageRating ==0.0){
+                                      return Text("0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                    }else{
+                                      return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                    }
+                                  }
+                              ),
+                            ),
+                          ]
+                      ),
+                      SizedBox(height:10),
+                      SingleChildScrollView(
+                        child: StreamBuilder(
+                            stream: FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).collection("Trips").doc(widget.document.id).collection('TripReviews').snapshots(),
+                            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Text('Error: ${snapshot.error}'),
+                                );
+                              }
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (snapshot.data!.size == 0) { //kalau data takde
+                                return Container(
+                                  alignment: Alignment.center,
+                                  padding:  EdgeInsets.all(10),
+                                  child: Text("No comments have been left for this trip yet" +snapshot.data!.size.toString(),style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.normal, fontStyle: FontStyle.normal)),
+                                );
+                              }
+                              return ListView(
+                                shrinkWrap: true,//kalau buang ni listtile tak keluar
+                                children: snapshot.data!.docs.map((document){
+                                  return ListTile(
+                                    tileColor: Colors.white,
+                                    leading:Container(
+                                      child: CircleAvatar(
+                                        radius:50,
+                                        backgroundImage: NetworkImage(document.get("picUri")),
+                                      ),
+                                    ),
+                                    title: Column(
+                                      children: [
+                                        Text(document.get("name")),
+                                        Container(
+                                          child: RatingBar.builder(
+                                            initialRating: document.get("rating"),
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                            itemBuilder: (context, _) => Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            onRatingUpdate: (rating) {
+                                              print(rating);
+                                              setState(() {});
+                                            },
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    subtitle: Text(
+                                        '${document.get("comment")}'
+                                            '\n\n${document.get("date")}'
+                                    ),
+                                    isThreeLine: true,
+                                  );
+                                }
+                                ).toList(),
+                              );
+                            }
+                        ),
                       ),
                     ]
                   )

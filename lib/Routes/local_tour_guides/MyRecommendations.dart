@@ -89,6 +89,7 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                 String about = data["description"];
 
                                 int index = 0;
+
                                 print("replyer document:"+document.toString());
                                 return InkWell(
                                   onTap:(){
@@ -183,6 +184,19 @@ class _MyRecommendationsState extends State<MyRecommendations> {
                                                   ),
                                                   child: Column(
                                                       children: [
+                                                        FutureBuilder<Map<String,dynamic>>(
+                                                              future:UserInfos().getRatingAverageTrip(document, FirebaseAuth.instance.currentUser!.uid),
+                                                              builder:(context, snapshot){
+                                                                final averageRating = snapshot.data?['averageRating'];
+                                                                final totalDocuments = snapshot.data?['totalDocuments'];
+                                                                if(averageRating ==0.0){
+                                                                  return Text("Rating: 0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w700),);
+                                                                }else{
+                                                                  return Text("Rating: "+averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.w700),);
+                                                                }
+                                                              }
+                                                          ),
+                                                        SizedBox(height: 8),
                                                         SingleChildScrollView(
                                                             scrollDirection: Axis.horizontal,
                                                             child: Row(

@@ -104,11 +104,15 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           Container(
                             child:FutureBuilder<Map<String,dynamic>>(
-                                future:UserInfos().getRatingAverage(widget.document),
+                                future:UserInfos().getRatingAverage(widget.document.id.toString()),
                                 builder:(context, snapshot){
                                   final averageRating = snapshot.data?['averageRating'];
                                   final totalDocuments = snapshot.data?['totalDocuments'];
-                                  return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                  if(snapshot.hasData!){
+                                    return Text("0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                  }else{
+                                    return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                  }
                                 }
                             ),
                           ),

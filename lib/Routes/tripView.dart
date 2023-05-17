@@ -207,11 +207,15 @@ class _TripViewState extends State<TripView> {
                       ),
                       Container(
                         child:FutureBuilder<Map<String,dynamic>>(
-                            future:UserInfos().getRatingAverageTrip(widget.tripDocument,widget.userDocument),
+                            future:UserInfos().getRatingAverageTrip(widget.tripDocument,widget.userDocument.id.toString()),
                             builder:(context, snapshot){
                               final averageRating = snapshot.data?['averageRating'];
                               final totalDocuments = snapshot.data?['totalDocuments'];
-                              return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                              if(averageRating ==0.0){
+                                return Text("0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                              }else{
+                                return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                              }
                             }
                         ),
                       ),
@@ -420,7 +424,7 @@ class _TripViewState extends State<TripView> {
                       ),
                       SingleChildScrollView(
                         child: StreamBuilder(
-                            stream: FirebaseFirestore.instance.collection("Users").doc(widget.userDocument.id).collection("Trip").doc(widget.tripDocument.id).collection('TripReviews').snapshots(),
+                            stream: FirebaseFirestore.instance.collection("Users").doc(widget.userDocument.id).collection("Trips").doc(widget.tripDocument.id).collection('TripReviews').snapshots(),
                             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                               if (snapshot.hasError) {
                                 return Center(
@@ -436,7 +440,7 @@ class _TripViewState extends State<TripView> {
                                 return Container(
                                   alignment: Alignment.center,
                                   padding:  EdgeInsets.all(10),
-                                  child: Text("No comments have been left for this trip yet",style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.normal, fontStyle: FontStyle.normal)),
+                                  child: Text("No comments have been left for this trip yet" +snapshot.data!.size.toString(),style:TextStyle(color:Colors.black,fontSize: 15,fontWeight: FontWeight.normal, fontStyle: FontStyle.normal)),
                                 );
                               }
                               return ListView(

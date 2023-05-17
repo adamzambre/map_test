@@ -168,10 +168,10 @@ class UserInfos {
     }
   }
 
-  Future<Map<String, dynamic>> getRatingAverage(QueryDocumentSnapshot<Object?> document) async{
+  Future<Map<String, dynamic>> getRatingAverage(String document) async{
     int totalDocuments = 0;
     double totalRating = 0;
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(document.id).collection('UserReviews').get();
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(document).collection('UserReviews').get();
     final List<QueryDocumentSnapshot> documents = querySnapshot.docs;
     totalDocuments = documents.length;
     print("TOTAL DOCUMENTS: "+totalDocuments.toString());
@@ -181,6 +181,9 @@ class UserInfos {
       totalRating += rating;
     }
     double averageRating = totalRating / (5 * totalDocuments);
+    if(totalDocuments == 0){
+      averageRating =0.0;
+    }
 
     return {'averageRating': averageRating, 'totalDocuments': totalDocuments};
   }
@@ -234,10 +237,10 @@ class UserInfos {
     }
   }
 
-  Future<Map<String, dynamic>> getRatingAverageTrip(QueryDocumentSnapshot<Object?> documentTrip,QueryDocumentSnapshot<Object?> documentLTG) async{
+  Future<Map<String, dynamic>> getRatingAverageTrip(QueryDocumentSnapshot<Object?> documentTrip,String documentLTG) async{
     int totalDocuments = 0;
     double totalRating = 0;
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(documentLTG.id).collection('Trips')
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').doc(documentLTG).collection('Trips')
         .doc(documentTrip.id)
         .collection('TripReviews')
         .get();
@@ -250,6 +253,10 @@ class UserInfos {
       totalRating += rating;
     }
     double averageRating = totalRating / (5 * totalDocuments);
+    print(averageRating);
+    if(totalDocuments == 0){
+      averageRating =0.0;
+    }
 
     return {'averageRating': averageRating, 'totalDocuments': totalDocuments};
   }

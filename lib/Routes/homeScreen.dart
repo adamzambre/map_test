@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:map_test/Routes/chat.dart';
 import 'package:map_test/Routes/profileView.dart';
 
+import '../Services/user_info.dart';
+
 void main()=>runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -147,6 +149,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                           )
                                         ),
                                     ),
+                                  SizedBox(height:10),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                        children:[
+                                          Container(
+                                            alignment: Alignment.topLeft,
+                                            padding:  EdgeInsets.fromLTRB(10,8,10,10),
+                                            child: Text("Rating:",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),),
+                                          ),
+                                          Container(
+                                            child:FutureBuilder<Map<String,dynamic>>(
+                                                future:UserInfos().getRatingAverage(document.id.toString()),
+                                                builder:(context, snapshot){
+                                                  final averageRating = snapshot.data?['averageRating'];
+                                                  final totalDocuments = snapshot.data?['totalDocuments'];
+                                                  if(averageRating ==0.0){
+                                                    return Text("0.0 ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                                  }else{
+                                                    return Text(averageRating.toString()+" ("+totalDocuments.toString()+")",style: TextStyle(color:Colors.black,fontSize: 20,fontWeight: FontWeight.w700),);
+                                                  }
+                                                }
+                                            ),
+                                          ),
+                                        ]
+                                    ),
+                                  ),
                                   SizedBox(height: 10),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
