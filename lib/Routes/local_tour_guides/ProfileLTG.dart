@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:map_test/Constants/Constants.dart';
+import 'package:map_test/Routes/admin_messages.dart';
+import 'package:map_test/Routes/chat.dart';
 //import 'package:airbnb_clone/Model/Property.dart';
 //import 'package:airbnb_clone/Routes/AddProperty.dart';
 import 'package:map_test/Routes/local_tour_guides/InfoPersonnel2LTG.dart';
@@ -145,19 +147,25 @@ class _ProfileLTGState extends State<ProfileLTG> {
         height: 1,
         ),
           TextButton(
-          onPressed: (){},
+          onPressed: (){
+            Navigator.push(
+              context, MaterialPageRoute(
+                builder: (context) =>AdminMessages()
+            ),
+            );
+          },
             child: Padding(
               padding: EdgeInsets.all(15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                 Expanded(
-                  child: Text("Notifications",
+                  child: Text("Admin",
                   style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w300),
                   overflow: TextOverflow.ellipsis,),
                 ),
                 Icon(
-                  Icons.notifications_none,
+                  Icons.support_agent_sharp,
                 ),
                 ],
               ),

@@ -6,6 +6,7 @@ import 'package:map_test/Routes/InfoPersonnel2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:map_test/Routes/admin_messages.dart';
 import 'package:map_test/Routes/login.dart';
 
 void main()=>runApp(
@@ -145,19 +146,25 @@ class _ProfileState extends State<Profile> {
             height: 1,
           ),
           TextButton(
-            onPressed: (){},
+            onPressed: (){
+              Navigator.push(
+                context, MaterialPageRoute(
+                  builder: (context) =>AdminMessages()
+              ),
+              );
+            },
             child: Padding(
             padding: EdgeInsets.all(15),
               child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
-                  child: Text("Notifications",
+                  child: Text("Admin",
                   style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w300),
                   overflow: TextOverflow.ellipsis,),
                 ),
                 Icon(
-                  Icons.notifications_none,
+                  Icons.support_agent_sharp,
                 ),
               ],
               ),

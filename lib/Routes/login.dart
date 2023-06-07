@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:map_test/Constants/Constants.dart';
 import 'package:flutter/material.dart';
 import 'package:map_test/Map.dart';
@@ -152,7 +153,6 @@ class _LoginState extends State<Login> {
                     }else if(LocalTourGuide==true){
 
                       ///////////////////////////////start dari sini nak sign in local tour guide secara sendiri
-                      if(!newUser){//user log in
                         print("local is logging in ");
                         if (emailController.text.isEmpty || !emailController.text.contains('@')) {
                           // Display an error message if the email is invalid
@@ -177,7 +177,7 @@ class _LoginState extends State<Login> {
                             );
                           }
                         }
-                      }else{//user creates an account
+                      /*else{//user creates an account
                         print("local creates an account");
                         if (emailController.text.isEmpty || !emailController.text.contains('@')) {
                           // Display an error message if the email is invalid
@@ -213,7 +213,7 @@ class _LoginState extends State<Login> {
                             }
                           }
                         }
-                      }
+                      }*/
                       ///////////////////////////////sampai sini
                       // print("Local Tour Guide is logging in ");//ni just so local tour guide boleh log in je
                       // if (emailController.text.isEmpty || !emailController.text.contains('@')) {
@@ -277,6 +277,7 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 UserSigninOrLogIn(),
+                forgotPassword()
                 //SizedBox(height: 20,),
                 //Text("Or continue with " ,style: TextStyle(color: Colors.grey[500], fontSize: 14,fontWeight: FontWeight.w500),),
                 //SizedBox(height: 15,),
@@ -445,7 +446,7 @@ class _LoginState extends State<Login> {
 
   Widget UserSigninOrLogIn()=>
       Visibility(
-        visible: true,//!LocalTourGuide,////////////////////////ni set ke true je supaya senang ltg nak sign up sendiri
+        visible: !LocalTourGuide,////////////////////////ni set ke true je supaya senang ltg nak sign up sendiri
         child: InkWell(
           onTap: () {
             setState(() {
@@ -472,4 +473,87 @@ class _LoginState extends State<Login> {
           ),
         ),
       );
+
+  Widget forgotPassword()=>
+      Visibility(
+        visible: !newUser,
+        child: ElevatedButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Forgot Password'),
+                  content: TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        String email = emailController.text.trim();
+                        resetPassword(email);
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Reset Password'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Text('Forgot Password?'),
+        ),
+      );
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      // Password reset email sent successfully
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Password Reset'),
+            content: Text('A password reset link has been sent to your email.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (error) {
+      // Handle password reset error
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Password Reset Error'),
+            content: Text(error.toString()),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 }

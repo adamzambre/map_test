@@ -171,6 +171,7 @@ class AuthService {
         "city":"",
         "picUri":"",
         "userType":"tourist",
+        "averageRating":0.0,
       });
       return [true,error];
     }catch(e){

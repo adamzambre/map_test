@@ -149,8 +149,7 @@ class UserInfos {
           transaction) async { //run trasnactions is when u want to ubah documentSSSSS (banyak document sekali gus) so data will not be ubah by other people while requesting, gitu
         //we read dulu the documetns from database to make sure we are working with the most uptodate data (beza dengan batched)
         DocumentSnapshot snapshot = await transaction.get(documentReference);
-        if (!snapshot
-            .exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
+        if (!snapshot.exists) { //if there is no data (no document of that) (user tak buat lagi document tu)
           documentReference.set({
             "rating":rating,
             "uid":uid,
@@ -159,6 +158,13 @@ class UserInfos {
             "comment": comment,
             "date": formatter
           });
+          // Update averageRating field in the Users collection
+          final Map<String, dynamic> ratingData = await getRatingAverage(document.id);
+          final double averageRating = ratingData['averageRating'];
+
+          final DocumentReference userReference = FirebaseFirestore.instance.collection('Users').doc(document.id);
+          await transaction.update(userReference, {'averageRating': averageRating});
+
           return true;
         }
       });

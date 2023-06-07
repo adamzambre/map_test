@@ -83,6 +83,7 @@ class _MessagesState extends State<Messages> {
 
                                   QueryDocumentSnapshot document = snapshot.data!.docs.first;
                                   var data = document.data() as Map<String, dynamic>;//BENDA NI YG BAGI ERROR "data!.data()"
+                                  String userTypeFB = data["userType"];
                                   String nameFB = data["name"]!="" ? data['name'] : 'please insert name';
                                   String picUri = data["picUri"]!="" ? data['picUri'] : 'https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg';
                                   return Container(

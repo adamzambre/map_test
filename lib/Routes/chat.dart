@@ -75,7 +75,7 @@ class _ChatState extends State<Chat> {
                         ),
                       ),
                       Flexible(
-                        child: Container(
+                        child: widget.document.get("userType").toString()!='admin'?Container(
                           child: InkWell(
                             onTap: (){
                               Navigator.push(
@@ -107,6 +107,31 @@ class _ChatState extends State<Chat> {
 
                               ],
                             ),
+                          ),
+                        ):
+                        Container(
+                          child: Row(
+                            children: [
+                              Container(
+                                padding:EdgeInsets.all(10),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: NetworkImage(widget.document.get("picUri")),
+                                ),
+                              ),
+                              Flexible(
+                                child:Container(
+                                  alignment: Alignment.center,
+                                  padding:EdgeInsets.all(10),
+                                  child: Text(widget.document.get('name'),
+                                    style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600),
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ),
+
+                            ],
                           ),
                         ),
                       )
